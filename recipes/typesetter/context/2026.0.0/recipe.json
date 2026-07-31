@@ -4,7 +4,7 @@
   "name": "ConTeXt LMTX",
   "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/context/icon.png",
   "description": "The ConTeXt LMTX typesetting system. Compiles .tex documents to PDF with LuaMetaTeX and SyncTeX support.",
-  "notes": "ConTeXt runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1). The image uses the same texlive/texlive:latest-full base as the PreTeXt recipe. The context command uses LuaMetaTeX by default; the recipe does not pass --luatex. The engine adapter enables --synctex=repeat so the generated SyncTeX data is compatible with standard external SyncTeX consumers, then returns it through the generic compile-artifact protocol. The bridge keeps a per-connection working tree and only transfers changed project files after the first compile.",
+  "notes": "ConTeXt runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1). The image uses the same texlive/texlive:latest-full base as the LaTeX TeX Live recipe. The context command uses LuaMetaTeX by default; the recipe does not pass --luatex. The engine adapter enables --synctex=repeat so the generated SyncTeX data is compatible with standard external SyncTeX consumers, then returns it through the generic compile-artifact protocol. The bridge keeps a per-connection working tree and only transfers changed project files after the first compile.",
   "tags": [
     "context",
     "lmtx",
