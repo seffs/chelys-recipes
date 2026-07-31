@@ -31,7 +31,7 @@
     "modes": [
         {
             "kind": "docker",
-            "image": "chelys/tinymist-typeset:local",
+            "image": "ghcr.io/texlyre/chelys-recipe-tinymist:0.15.2",
             "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/tinymist/0.15.2/Dockerfile",
             "buildSteps": [],
             "runArgs": [

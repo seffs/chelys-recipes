@@ -256,7 +256,7 @@
     },
     {
       "kind": "docker",
-      "image": "chelys/ltex-ls-plus:local",
+      "image": "ghcr.io/texlyre/chelys-recipe-ltex-ls-plus:18.7.0",
       "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/ltex-ls-plus/18.7.0/Dockerfile",
       "buildSteps": [],
       "runArgs": [

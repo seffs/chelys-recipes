@@ -84,7 +84,7 @@
     },
     {
       "kind": "docker",
-      "image": "chelys/harper-ls:local",
+      "image": "ghcr.io/texlyre/chelys-recipe-harper-ls:2.5.0",
       "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/harper-ls/2.5.0/Dockerfile",
       "buildSteps": [],
       "runArgs": [

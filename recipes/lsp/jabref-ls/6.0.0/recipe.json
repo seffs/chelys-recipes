@@ -84,7 +84,7 @@
     },
     {
       "kind": "docker",
-      "image": "chelys/jabls:local",
+      "image": "ghcr.io/texlyre/chelys-recipe-jabref-ls:6.0.0",
       "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/jabref-ls/6.0.0/Dockerfile",
       "buildSteps": [],
       "runArgs": [

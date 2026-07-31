@@ -74,7 +74,7 @@
     },
     {
       "kind": "docker",
-      "image": "chelys/texlab:local",
+      "image": "ghcr.io/texlyre/chelys-recipe-texlab:5.26.0",
       "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/texlab/5.26.0/Dockerfile",
       "buildSteps": [],
       "runArgs": [

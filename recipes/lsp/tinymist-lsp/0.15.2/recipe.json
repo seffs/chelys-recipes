@@ -74,7 +74,7 @@
     },
     {
       "kind": "docker",
-      "image": "chelys/tinymist:local",
+      "image": "ghcr.io/texlyre/chelys-recipe-tinymist-lsp:0.15.2",
       "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/tinymist-lsp/0.15.2/Dockerfile",
       "buildSteps": [],
       "runArgs": [

@@ -26,7 +26,7 @@
     "modes": [
         {
             "kind": "docker",
-            "image": "chelys/sile:local",
+            "image": "ghcr.io/texlyre/chelys-recipe-sile:0.15.7",
             "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/sile/0.15.7/Dockerfile",
             "buildSteps": [],
             "runArgs": [

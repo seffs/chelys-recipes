@@ -32,7 +32,7 @@
     "modes": [
         {
             "kind": "docker",
-            "image": "chelys/pretext:local",
+            "image": "ghcr.io/texlyre/chelys-recipe-pretext:2.44.0",
             "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/pretext/2.44.0/Dockerfile",
             "buildSteps": [],
             "runArgs": [
