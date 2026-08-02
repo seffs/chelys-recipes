@@ -3,7 +3,7 @@
   "type": "lsp",
   "name": "Harper LS",
   "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/harper-ls/icon.svg",
-  "description": "Offline, privacy-first grammar and spelling checker exposed as a Language Server. Does not works well for formats such as TeX, LaTeX, Typst, BibTeX, but suited for Markdown, and plain text.",
+  "description": "Offline grammar and spell checker for Markdown and plain text, exposed as a language server.",
   "notes": "Harper LS is distributed via Cargo and requires the Rust toolchain in system mode. Docker mode builds Harper LS and the WebSocket proxy inside the image.",
   "tags": [
     "grammar",
@@ -85,7 +85,7 @@
     {
       "kind": "docker",
       "image": "ghcr.io/texlyre/chelys-recipe-harper-ls:2.5.0",
-      "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/harper-ls/2.5.0/Dockerfile",
+      "dockerfileUrl": "Dockerfile",
       "buildSteps": [],
       "runArgs": [
         "-p",

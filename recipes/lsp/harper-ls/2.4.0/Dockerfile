@@ -7,7 +7,9 @@ RUN cargo install lsp-ws-proxy --locked --root /out
 
 FROM rust:1-slim AS harper-builder
 
-RUN cargo install harper-ls@2.4.0 --locked --root /out
+ARG HARPER_VERSION=2.4.0
+
+RUN cargo install harper-ls@${HARPER_VERSION} --locked --root /out
 
 
 FROM debian:stable-slim
