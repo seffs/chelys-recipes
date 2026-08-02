@@ -98,6 +98,7 @@ export interface RecipeManifest {
   id: string;
   type: string;
   name: string;
+  iconUrl?: string;
   description: string;
   notes?: string;
   tags: string[];
@@ -123,6 +124,7 @@ export interface RecipeEntry {
   id: string;
   type: string;
   name: string;
+  iconUrl?: string;
   description: string;
   tags: string[];
   author: string;

@@ -170,6 +170,7 @@ async function buildApi() {
             id: recipeId,
             type: categoryId,
             name: latestManifest.name,
+            iconUrl: resolveImageUrl(latestManifest.iconUrl, categoryId, recipeId),
             description: latestManifest.description,
             tags: latestManifest.tags || [],
             author: latestManifest.author,
