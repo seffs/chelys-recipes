@@ -3,7 +3,7 @@
   "type": "lsp",
   "name": "LTeX LS Plus",
   "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/ltex-ls-plus/icon.svg",
-  "description": "Grammar and spell checker for LaTeX, Markdown, Typst, and BibTeX, built on LanguageTool. Exposes language and mother-tongue options for false-friend detection.",
+  "description": "LanguageTool grammar and spell checker for LaTeX, Markdown, Typst, and BibTeX, as a language server.",
   "notes": "System mode requires Java 21; set JAVA_HOME below if your default java is older. Docker mode bundles its own Java 21.",
   "tags": [
     "grammar",
@@ -257,7 +257,7 @@
     {
       "kind": "docker",
       "image": "ghcr.io/texlyre/chelys-recipe-ltex-ls-plus:18.7.0",
-      "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/ltex-ls-plus/18.7.0/Dockerfile",
+      "dockerfileUrl": "Dockerfile",
       "buildSteps": [],
       "runArgs": [
         "-p",
