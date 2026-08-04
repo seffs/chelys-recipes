@@ -1,10 +1,11 @@
+ARG TEXLIVE_TAG=latest-full
 ARG NODE_VERSION=22
 
 FROM ghcr.io/texlyre/chelys-typeset-bridge:1 AS bridge
 
 FROM node:${NODE_VERSION}-bookworm-slim AS node
 
-FROM texlive/texlive:latest-full
+FROM texlive/texlive:${TEXLIVE_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -27,7 +28,7 @@ RUN mkdir -p "${TEXMFCACHE}" \
 
 COPY --from=bridge /opt/chelys /opt/chelys
 
-ADD https://texlyre.github.io/chelys-recipes/recipes/typesetter/context/2026.0.0/engine.cjs /opt/chelys/engine.cjs
+COPY engine.cjs /opt/chelys/engine.cjs
 RUN chmod 0444 /opt/chelys/engine.cjs
 
 ENV WS_PORT=7042
