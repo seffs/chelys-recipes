@@ -3,7 +3,7 @@
   "type": "lsp",
   "name": "TexLab (LaTeX)",
   "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/texlab/icon.png",
-  "description": "Language server for LaTeX and BibTeX. Provides diagnostics, completion, hover, go-to-definition, references, and formatting for .tex and .bib files.",
+  "description": "Language server for LaTeX and BibTeX, with diagnostics, completion, hover, references, and formatting.",
   "notes": "TexLab communicates LSP over stdio and is bridged to WebSocket with lsp-ws-proxy. System mode installs the prebuilt TexLab binary and builds the proxy with cargo, requiring the Rust toolchain. Docker mode bundles TexLab and the proxy. TexLab indexes the packages used in a project to produce completion; the first index of a large project can take a moment. Build-related features (forward/inverse search, chktex diagnostics) depend on tools being present in the project environment.",
   "tags": [
     "latex",
@@ -75,7 +75,7 @@
     {
       "kind": "docker",
       "image": "ghcr.io/texlyre/chelys-recipe-texlab:5.26.0",
-      "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/texlab/5.26.0/Dockerfile",
+      "dockerfileUrl": "Dockerfile",
       "buildSteps": [],
       "runArgs": [
         "-p",
