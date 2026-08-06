@@ -1,5 +1,5 @@
 ARG TEXLIVE_TAG=latest-full
-ARG SPHINX_VERSION=9.1.1
+ARG SPHINX_VERSION=9.1.0
 
 FROM ghcr.io/texlyre/chelys-typeset-bridge:1 AS bridge
 

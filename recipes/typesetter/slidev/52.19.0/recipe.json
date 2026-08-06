@@ -1,37 +1,34 @@
 {
-    "id": "sphinx",
+    "id": "slidev",
     "type": "typesetter",
-    "name": "Sphinx (reStructuredText & MyST)",
-    "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/sphinx/icon.svg",
-    "description": "Builds Sphinx reStructuredText and MyST projects to PDF, and exports HTML, EPUB, or LaTeX sources.",
-    "notes": "Sphinx runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a Sphinx-specific engine adapter. The image uses the same texlive/texlive:latest-full base as the LaTeX TeX Live recipe, since PDF output goes through the latex builder and latexmk. Sphinx builds a configured project instead of a single file: a conf.py must exist at the project root or in source, doc, docs, or docs/source, which 'sphinx-quickstart' scaffolds. The adapter resolves that directory (or the one named in the Source directory field), runs 'sphinx-build -M <builder>' into _build/chelys, and returns either the PDF or a ZIP of the builder's output directory. Preview is PDF only; html and latex targets are download-only via Export because their output is a directory of cross-linked files. MyST parser and MyST-NB are installed, so Markdown and Jupyter notebook sources work alongside reStructuredText. The image also carries the common theme and extension set, Graphviz, PlantUML, and pandoc for nbsphinx. Projects needing other extensions add them through the Extra Python packages variable, which is appended to the pip install when the image is built; the prebuilt image only carries the defaults, so setting it builds locally instead of pulling. A first textbook-sized build can take minutes, so ENGINE_TIMEOUT defaults to 15 minutes. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile and Sphinx's doctree cache survives between builds. Clearing the cache discards both.",
+    "name": "Slidev",
+    "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/slidev/icon.svg",
+    "description": "Compiles Slidev Markdown decks to PDF, and exports PPTX, PNG, or a static site.",
+    "notes": "Slidev runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a Slidev-specific engine adapter. Slidev compiles a Markdown deck (slides.md by default) into slides. Preview is PDF only; PPTX, PNG, and static-site targets are download-only via Export, because PPTX/PNG are captured images and the site is a directory of files. PDF, PPTX, and PNG export render the slides with Playwright's bundled Chromium (provided by the Playwright base image); the static-site build uses Vite and needs no browser. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile. When options.action is 'clear-cache' the tree is wiped and status 0 returned without compiling. When options.export is true the output bytes are returned for download; other option keys are passed through from the recipe UI schema. Themes and addons must be present in the image because there is no per-project install step; the Extra themes and addons variable is appended to the global npm install at build time and every @slidev, slidev-theme-, and slidev-addon- package is linked into the workspace, so decks resolve them. The prebuilt image only carries the bundled themes, so setting it builds locally instead of pulling.",
     "tags": [
-        "sphinx",
-        "restructuredtext",
-        "myst",
+        "slidev",
         "markdown",
-        "typesetting",
-        "pdf",
-        "html",
-        "epub"
+        "slides",
+        "presentation",
+        "pdf"
     ],
     "author": "TeXlyre",
-    "version": "9.1.1",
-    "lastUpdated": "2026-08-03T10:00:00Z",
+    "version": "52.19.0",
+    "lastUpdated": "2026-08-07T10:00:00Z",
     "variables": [
         {
             "key": "wsPort",
             "label": "WebSocket port",
             "kind": "number",
-            "default": "7048",
+            "default": "7044",
             "help": "Port the compile bridge listens on."
         },
         {
-            "key": "pythonPackages",
-            "label": "Extra Python packages",
+            "key": "npmPackages",
+            "label": "Extra themes and addons",
             "kind": "text",
             "default": "",
-            "help": "Space-separated pip packages added to the image, e.g. 'sphinx-gallery sphinxcontrib-katex'."
+            "help": "Space-separated npm packages added to the image, e.g. 'slidev-theme-penguin slidev-addon-python-runner'."
         }
     ],
     "env": {},
@@ -41,7 +38,7 @@
     "modes": [
         {
             "kind": "docker",
-            "image": "ghcr.io/texlyre/chelys-recipe-sphinx:9.1.1",
+            "image": "ghcr.io/texlyre/chelys-recipe-slidev:52.19.0",
             "dockerfileUrl": "Dockerfile",
             "buildSteps": [],
             "runArgs": [
@@ -56,22 +53,21 @@
         }
     ],
     "typeConfig": {
-        "configId": "sphinx",
-        "projectType": "sphinx",
+        "configId": "slidev",
+        "projectType": "slidev",
         "inputExtensions": [
-            "rst",
             "md"
         ],
         "inputFiles": [
             {
-                "extension": "rst",
+                "extension": "md",
                 "label": {
                     "key": "{typesetter} File",
                     "params": {
-                        "typesetter": "reStructuredText"
+                        "typesetter": "Slidev"
                     }
                 },
-                "mimeType": "text/x-rst"
+                "mimeType": "text/markdown"
             }
         ],
         "outputFormats": [
@@ -87,12 +83,12 @@
                 "outputType": "canvas"
             },
             {
-                "id": "epub",
-                "mimeType": "application/epub+zip"
-            },
-            {
                 "id": "zip",
                 "mimeType": "application/zip"
+            },
+            {
+                "id": "pptx",
+                "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
             }
         ],
         "transportType": "websocket",
@@ -121,40 +117,25 @@
                         ]
                     },
                     {
-                        "key": "sourceDir",
+                        "key": "withClicks",
                         "label": {
-                            "key": "Source Directory:"
-                        },
-                        "kind": "text",
-                        "sendAs": "option",
-                        "defaultValue": "",
-                        "help": {
-                            "key": "Directory containing conf.py. Leave blank to detect it automatically."
-                        }
-                    },
-                    {
-                        "key": "nitpicky",
-                        "label": {
-                            "key": "Nitpicky mode"
+                            "key": "Export click steps"
                         },
                         "kind": "boolean",
                         "sendAs": "option",
                         "defaultValue": false,
                         "help": {
-                            "key": "Warn about every missing cross-reference target."
+                            "key": "Emit one page per click animation instead of one page per slide."
                         }
                     },
                     {
-                        "key": "freshEnv",
+                        "key": "dark",
                         "label": {
-                            "key": "Rebuild from scratch"
+                            "key": "Dark theme"
                         },
                         "kind": "boolean",
                         "sendAs": "option",
-                        "defaultValue": false,
-                        "help": {
-                            "key": "Discards the cached environment. Slow; needed after config changes."
-                        }
+                        "defaultValue": false
                     }
                 ]
             },
@@ -173,50 +154,53 @@
                                 "value": "pdf"
                             },
                             {
-                                "label": "Web site (ZIP)",
-                                "value": "html"
+                                "label": "PowerPoint (PPTX)",
+                                "value": "pptx"
                             },
                             {
-                                "label": "EPUB",
-                                "value": "epub"
+                                "label": "Images (PNG ZIP)",
+                                "value": "png"
                             },
                             {
-                                "label": "LaTeX sources (ZIP)",
-                                "value": "latex"
+                                "label": "Static site (ZIP)",
+                                "value": "site"
                             }
                         ]
                     },
                     {
-                        "key": "sourceDir",
+                        "key": "range",
                         "label": {
-                            "key": "Source Directory:"
+                            "key": "Slide range:"
                         },
                         "kind": "text",
                         "sendAs": "option",
-                        "defaultValue": ""
+                        "defaultValue": "",
+                        "help": {
+                            "key": "Slides to export, e.g. 1,4-5,6. Leave blank for all."
+                        }
                     },
                     {
-                        "key": "warningsAsErrors",
+                        "key": "withClicks",
                         "label": {
-                            "key": "Treat warnings as errors"
+                            "key": "Export click steps"
                         },
                         "kind": "boolean",
                         "sendAs": "option",
                         "defaultValue": false
                     },
                     {
-                        "key": "freshEnv",
+                        "key": "withToc",
                         "label": {
-                            "key": "Rebuild from scratch"
+                            "key": "Include PDF outline"
                         },
                         "kind": "boolean",
                         "sendAs": "option",
                         "defaultValue": false
                     },
                     {
-                        "key": "includeLog",
+                        "key": "dark",
                         "label": {
-                            "key": "Include log file"
+                            "key": "Dark theme"
                         },
                         "kind": "boolean",
                         "sendAs": "option",
@@ -235,25 +219,17 @@
                 }
             ],
             "info": {
-                "title": "Sphinx",
+                "title": "Slidev",
                 "rows": [
                     {
                         "label": {
                             "key": "{typesetter} Engine:",
                             "params": {
-                                "typesetter": "Sphinx"
+                                "typesetter": "Slidev"
                             }
                         },
                         "value": {
-                            "key": "Sphinx v9.1.1"
-                        }
-                    },
-                    {
-                        "label": {
-                            "key": "Build Tool:"
-                        },
-                        "value": {
-                            "key": "sphinx-build, latexmk (TeX Live full 2026)"
+                            "key": "Slidev v52.19.0"
                         }
                     },
                     {
@@ -269,7 +245,7 @@
                             "key": "Input Format:"
                         },
                         "value": {
-                            "key": "reStructuredText (.rst), MyST Markdown (.md) with conf.py"
+                            "key": "Markdown (.md)"
                         }
                     },
                     {
@@ -285,7 +261,7 @@
                             "key": "Export Formats:"
                         },
                         "value": {
-                            "key": "PDF, Web site (ZIP), EPUB, LaTeX sources (ZIP)"
+                            "key": "PDF, PPTX, PNG (ZIP), Static site (ZIP)"
                         }
                     }
                 ]
