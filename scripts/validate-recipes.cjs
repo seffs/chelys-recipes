@@ -14,6 +14,11 @@ const INCREMENTAL_SYNC_MIN_BRIDGE = 1;
 
 const SEMVER_DIR = /^\d+\.\d+\.\d+/;
 
+const DESCRIPTION_MIN_LENGTH = 20;
+const DESCRIPTION_MAX_LENGTH = 140;
+
+const COPY_INSTRUCTION = /^\s*COPY\s+(?!--)(\S+)\s+\S+\s*$/i;
+
 function discoverRecipeVersions(recipePath) {
   const versionDirs = fs
     .readdirSync(recipePath, { withFileTypes: true })
@@ -66,6 +71,70 @@ class RecipeValidator {
     return true;
   }
 
+  validateIcon(manifest, recipeId, categoryId, recipePath) {
+    if (manifest.iconUrl === undefined) {
+      return;
+    }
+    if (typeof manifest.iconUrl !== 'string' || !manifest.iconUrl.trim()) {
+      this.log('error', 'iconUrl must be a non-empty string', recipeId);
+      return;
+    }
+    if (!/^https?:\/\//.test(manifest.iconUrl)) {
+      this.log('error', 'iconUrl must be an absolute URL', recipeId);
+      return;
+    }
+
+    const prefix = `/recipes/${categoryId}/${recipeId}/`;
+    const index = manifest.iconUrl.indexOf(prefix);
+    if (index === -1) {
+      this.log('error', `iconUrl must point at ${prefix}`, recipeId);
+      return;
+    }
+
+    const file = manifest.iconUrl.slice(index + prefix.length);
+    if (!file || file.includes('/')) {
+      this.log('error', `iconUrl must name a file directly under ${prefix}`, recipeId);
+      return;
+    }
+    if (!fs.existsSync(path.join(recipePath, file))) {
+      this.log('error', `iconUrl target not found: ${file}`, recipeId);
+    }
+  }
+
+  validateDockerfile(mode, manifest, recipeId, recipeVersionPath) {
+    if (/^https?:\/\//.test(mode.dockerfileUrl)) {
+      this.log('warning', 'dockerfileUrl should be relative to the recipe version directory', recipeId);
+    }
+
+    const dockerfilePath = /^https?:\/\//.test(mode.dockerfileUrl)
+      ? path.join(recipeVersionPath, 'Dockerfile')
+      : path.join(recipeVersionPath, mode.dockerfileUrl);
+
+    if (!fs.existsSync(dockerfilePath)) {
+      this.log('error', `dockerfileUrl target not found: ${mode.dockerfileUrl}`, recipeId);
+      return;
+    }
+
+    const declared = new Set(
+      (manifest.extraFiles || []).map((entry) => entry.trim().replace(/^\.\//, '')),
+    );
+
+    for (const line of fs.readFileSync(dockerfilePath, 'utf8').split('\n')) {
+      const match = line.match(COPY_INSTRUCTION);
+      if (!match) {
+        continue;
+      }
+      const source = match[1];
+      if (!declared.has(source)) {
+        this.log(
+          'error',
+          `Dockerfile copies "${source}" but it is not declared in extraFiles`,
+          recipeId,
+        );
+      }
+    }
+  }
+
   validateVariables(manifest, recipeId) {
     if (!manifest.variables) {
       return;
@@ -106,10 +175,7 @@ class RecipeValidator {
           this.log('error', 'Docker mode requires an image', recipeId);
         }
         if (mode.dockerfileUrl) {
-          const localDockerfile = path.join(recipeVersionPath, 'Dockerfile');
-          if (!fs.existsSync(localDockerfile)) {
-            this.log('warning', 'dockerfileUrl declared but no local Dockerfile found', recipeId);
-          }
+          this.validateDockerfile(mode, manifest, recipeId, recipeVersionPath);
         } else if (!mode.dockerfile) {
           this.log('warning', 'Docker mode has neither dockerfile nor dockerfileUrl', recipeId);
         }
@@ -180,7 +246,7 @@ class RecipeValidator {
     }
   }
 
-  validateManifest(recipeVersionPath, recipeId, categoryId, validCategories) {
+  validateManifest(recipeVersionPath, recipePath, recipeId, categoryId, validCategories) {
     const manifestPath = path.join(recipeVersionPath, 'recipe.json');
 
     let manifest;
@@ -236,10 +302,19 @@ class RecipeValidator {
       this.log('error', 'Invalid lastUpdated date format', recipeId);
     }
 
-    if (manifest.description && manifest.description.length < 20) {
-      this.log('warning', 'Description is quite short, consider adding more detail', recipeId);
+    if (manifest.description) {
+      if (manifest.description.length < DESCRIPTION_MIN_LENGTH) {
+        this.log('warning', 'Description is quite short, consider adding more detail', recipeId);
+      } else if (manifest.description.length > DESCRIPTION_MAX_LENGTH) {
+        this.log(
+          'warning',
+          `Description is ${manifest.description.length} characters; keep it under ${DESCRIPTION_MAX_LENGTH} and move detail into notes or the README`,
+          recipeId,
+        );
+      }
     }
 
+    this.validateIcon(manifest, recipeId, categoryId, recipePath);
     this.validateVariables(manifest, recipeId);
     this.validateModes(manifest, recipeId, recipeVersionPath);
     this.validateExtraFiles(manifest, recipeId, recipeVersionPath);
@@ -340,6 +415,7 @@ class RecipeValidator {
 
           const manifest = this.validateManifest(
             versionInfo.path,
+            recipePath,
             recipeId,
             categoryId,
             validCategories,

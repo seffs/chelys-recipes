@@ -89,7 +89,8 @@ API response structure:
           "id": "harper-ls",
           "type": "lsp",
           "name": "Harper LS",
-          "description": "Offline grammar and spelling checker.",
+          "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/harper-ls/icon.svg",
+          "description": "Offline grammar and spell checker for Markdown and plain text.",
           "tags": ["grammar", "spell-check"],
           "author": "TeXlyre",
           "version": "1.0.0",
@@ -115,7 +116,8 @@ args, environment values, the Dockerfile, `transportUrl`, and `clientConfig`.
   "id": "example-ls",
   "type": "lsp",
   "name": "Example LS",
-  "description": "A short description of at least twenty characters.",
+  "iconUrl": "icon.svg",
+  "description": "A single sentence of 20 to 140 characters, shown on the tool card.",
   "tags": ["example"],
   "author": "You",
   "version": "1.0.0",
@@ -156,15 +158,52 @@ args, environment values, the Dockerfile, `transportUrl`, and `clientConfig`.
 
 - `system`: `installSteps` then a long-running `runCommand`
 - `docker`: `buildSteps`, an `image`, and either an inline `dockerfile` or a
-  `dockerfileUrl` Chelys fetches and writes before `docker build`
+  `dockerfileUrl` Chelys fetches and writes before `docker build`. Relative
+  paths resolve against the manifest, so a `Dockerfile` beside `recipe.json` is
+  referenced by name. Files the build copies in are listed in `extraFiles`.
 - `connect`: attach to a server already running on the configured port
 
 ## Included Recipes
 
-- **LTeX LS Plus** (`recipes/lsp/ltex-ls-plus`): LanguageTool grammar and spell
-  checker with `language` and `motherTongue` options.
-- **Harper LS** (`recipes/lsp/harper-ls`): offline, privacy-first grammar and
-  spelling checker with a configurable English `dialect`.
+Recipe `description` fields are kept to a single sentence because they are shown
+on the tool card in Chelys. Longer background belongs in the manifest `notes`
+field and in each recipe's `README.md`.
+
+### Language servers
+
+| Recipe | Inputs | Notes |
+| --- | --- | --- |
+| **Harper LS** (`lsp/harper-ls`) | Markdown, plain text | Offline and privacy-first, with a configurable English `dialect`. Weak on TeX, LaTeX, Typst, and BibTeX, where LTeX LS Plus is the better fit. |
+| **JabRef LSP** (`lsp/jabref-ls`) | `.bib` | Integrity, key, and formatting diagnostics from JabRef's `jabls`. |
+| **LTeX LS Plus** (`lsp/ltex-ls-plus`) | LaTeX, Markdown, Typst, BibTeX | LanguageTool-backed, with `language` and `motherTongue` options for false-friend detection. |
+| **TexLab** (`lsp/texlab`) | `.tex`, `.bib` | Diagnostics, completion, hover, go-to-definition, references, and formatting. Indexes project packages on first open. |
+| **Tinymist** (`lsp/tinymist-lsp`) | `.typ` | Diagnostics, completion, hover, go-to-definition, and formatting. |
+
+### Typesetters
+
+| Recipe | Inputs | Preview | Exports |
+| --- | --- | --- | --- |
+| **Asciidoctor** (`typesetter/asciidoctor`) | `.adoc` | PDF | HTML, EPUB, reveal.js, DOCX |
+| **ConTeXt LMTX** (`typesetter/context`) | `.tex` | PDF | SyncTeX alongside the PDF |
+| **LilyPond** (`typesetter/lilypond`) | `.ly` | PDF | PNG, SVG, MIDI, synthesised MP3 |
+| **PreTeXt** (`typesetter/pretext`) | `.ptx` | PDF | web and EPUB targets as ZIP |
+| **Quarto** (`typesetter/quarto`) | `.qmd` | PDF via LaTeX or Typst | HTML, reveal.js, DOCX, PPTX, EPUB, Beamer |
+| **SILE** (`typesetter/sile`) | `.sil` | PDF | — |
+| **Slidev** (`typesetter/slidev`) | Markdown | PDF | PPTX, PNG, static site |
+| **Sphinx** (`typesetter/sphinx`) | `.rst`, `.md` | PDF | HTML site, EPUB, LaTeX sources as ZIP |
+| **TeX Live** (`typesetter/texlive`) | `.tex` | PDF | switchable pdfLaTeX, LuaLaTeX, XeLaTeX |
+| **Tinymist** (`typesetter/tinymist`) | `.typ` | PDF, PDF canvas, SVG canvas | PNG and SVG page bundles, experimental HTML |
+
+## Icons
+
+An optional `iconUrl` in the manifest is an absolute URL to an icon beside the
+recipe directory, shared across its version directories, and is carried through
+to the API index.
+
+Icons are third-party works aggregated into this repository, not MIT like the
+rest of it. Each keeps its upstream license and carries a notice in the file;
+see [`CONTRIBUTING.md#recipe-icons`](CONTRIBUTING.md#recipe-icons) for the per-icon attribution, the
+license texts in [`LICENSES/`](LICENSES), and the recipes that have no icon.
 
 ## Development
 
@@ -180,4 +219,6 @@ npm run pages-example
 
 ## License
 
-MIT
+MIT, except for the recipe icons, which are aggregated third-party works under
+their own licenses. See [`LICENSE`](LICENSE) and
+[`CONTRIBUTING.md#recipe-icons`](CONTRIBUTING.md#recipe-icons).

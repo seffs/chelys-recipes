@@ -38,7 +38,7 @@ ADD https://unpkg.com/fflate@0.8.2/package.json /opt/chelys/node_modules/fflate/
 ADD https://unpkg.com/fflate@0.8.2/lib/node.cjs /opt/chelys/node_modules/fflate/lib/node.cjs
 ADD https://unpkg.com/fflate@0.8.2/esm/browser.js /opt/chelys/node_modules/fflate/esm/browser.js
 
-ADD https://texlyre.github.io/chelys-recipes/recipes/typesetter/tinymist/0.15.2/engine.cjs /opt/chelys/engine.cjs
+COPY engine.cjs /opt/chelys/engine.cjs
 RUN chmod 0444 /opt/chelys/engine.cjs
 
 ENV WS_PORT=7046

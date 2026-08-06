@@ -7,6 +7,9 @@ RUN cargo install lsp-ws-proxy --locked --root /out
 
 FROM eclipse-temurin:21-jdk
 
+ARG JABREF_REF=main
+
+ENV JABREF_REF=${JABREF_REF}
 ENV WS_PORT=7021
 ENV JABLS_PORT=2087
 ENV PATH="/root/.jbang/bin:${PATH}"
@@ -17,9 +20,9 @@ RUN apt-get update \
 
 RUN curl -Ls https://sh.jbang.dev | bash -s - app setup
 
-RUN jbang trust add https://raw.githubusercontent.com/JabRef/jabref/main/.jbang/
+RUN jbang trust add "https://raw.githubusercontent.com/JabRef/jabref/${JABREF_REF}/.jbang/"
 
-RUN jbang https://raw.githubusercontent.com/JabRef/jabref/main/.jbang/JabLsLauncher.java --help
+RUN jbang "https://raw.githubusercontent.com/JabRef/jabref/${JABREF_REF}/.jbang/JabLsLauncher.java" --help
 
 COPY --from=proxy-builder /out/bin/lsp-ws-proxy /usr/local/bin/lsp-ws-proxy
 
@@ -29,7 +32,7 @@ RUN chmod +x /usr/local/bin/lsp-ws-proxy \
 #!/bin/sh
 set -e
 
-jbang https://raw.githubusercontent.com/JabRef/jabref/main/.jbang/JabLsLauncher.java -p "$JABLS_PORT" &
+jbang "https://raw.githubusercontent.com/JabRef/jabref/$JABREF_REF/.jbang/JabLsLauncher.java" -p "$JABLS_PORT" &
 
 while ! socat -T1 - TCP:127.0.0.1:"$JABLS_PORT" </dev/null >/dev/null 2>&1; do
   sleep 0.5

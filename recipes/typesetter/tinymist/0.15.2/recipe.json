@@ -3,7 +3,7 @@
     "type": "typesetter",
     "name": "Tinymist (Typst)",
     "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/tinymist/icon.png",
-    "description": "The Typst typesetting system via Tinymist. Compiles .typ documents to PDF, PDF canvas, and SVG canvas over a local WebSocket compile bridge, with experimental HTML export.",
+    "description": "Compiles Typst documents to PDF or SVG canvas, with experimental HTML export.",
     "notes": "Tinymist runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a Tinymist-specific engine adapter. The adapter drives 'tinymist compile', which is a drop-in for 'typst compile'. Render targets: PDF and Canvas (PDF) both produce a PDF; Canvas (SVG) produces Typst's native SVG output for a fast vector canvas. PDF output supports PDF standards (e.g. 1.7, a-2b, ua-1) and tagged-PDF via the grouped PDF options. SVG export can optionally emit each page as a separate SVG bundled in a ZIP, and PNG export always emits per-page images bundled in a ZIP at the chosen resolution. HTML export is experimental: Typst's HTML target is still incomplete and behind a feature flag, so it is offered as a separate download-only export with TYPST_FEATURES=html set. The image reuses the same Tinymist binary as the Tinymist LSP recipe plus Noto fonts for broad script coverage. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile. When options.action is 'clear-cache' the tree is wiped and status 0 returned without compiling.",
     "tags": [
         "typst",
@@ -32,7 +32,7 @@
         {
             "kind": "docker",
             "image": "ghcr.io/texlyre/chelys-recipe-tinymist:0.15.2",
-            "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/tinymist/0.15.2/Dockerfile",
+            "dockerfileUrl": "Dockerfile",
             "buildSteps": [],
             "runArgs": [
                 "-p",

@@ -1,0 +1,349 @@
+{
+    "id": "quarto",
+    "type": "typesetter",
+    "name": "Quarto",
+    "description": "Renders Quarto documents to PDF via LaTeX or Typst, and exports HTML, reveal.js, DOCX, and EPUB.",
+    "notes": "Quarto runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a Quarto-specific engine adapter. The image uses the same texlive/texlive:latest-full base as the LaTeX TeX Live recipe, so the pdf format renders through LaTeX; the typst format uses the Typst binary bundled with Quarto, and Pandoc is bundled too. The adapter runs 'quarto render' on the main file. Outside a project it passes --output so the artifact lands at a known path; inside a project (_quarto.yml or _quarto.yaml) it lets Quarto place the output and then locates the newest matching artifact, skipping .cache and _freeze. HTML and reveal.js are rendered with embed-resources so the download is a single self-contained file. Preview is PDF only; the other targets are download-only via Export. Code execution is enabled by default: the image includes a Python virtualenv with the Jupyter stack, matplotlib, pandas, numpy, and plotly, plus Chromium for diagram rendering (all versions are latest available to `texlive-full` TeX Live Debian image). Documents needing more are served by build-time variables rather than a fork: Extra Python packages appends to the pip install, Include R and knitr adds R with knitr and rmarkdown, and Extra R packages appends apt r-cran-* names. R is off by default because an R-based project's package set is project-specific, and the prebuilt image only carries the defaults, so setting any of these builds locally instead of pulling. A first render that executes a notebook can take minutes, so ENGINE_TIMEOUT defaults to 15 minutes. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile and Quarto's freeze cache survives between renders. Clearing the cache discards both.",
+    "tags": [
+        "quarto",
+        "markdown",
+        "pandoc",
+        "typesetting",
+        "pdf",
+        "html",
+        "reveal.js",
+        "docx"
+    ],
+    "author": "TeXlyre",
+    "version": "1.10.18",
+    "lastUpdated": "2026-08-03T10:00:00Z",
+    "variables": [
+        {
+            "key": "wsPort",
+            "label": "WebSocket port",
+            "kind": "number",
+            "default": "7049",
+            "help": "Port the compile bridge listens on."
+        },
+        {
+            "key": "pythonPackages",
+            "label": "Extra Python packages",
+            "kind": "text",
+            "default": "",
+            "help": "Space-separated pip packages added to the image, e.g. 'scikit-learn seaborn'."
+        },
+        {
+            "key": "includeR",
+            "label": "Include R and knitr",
+            "kind": "boolean",
+            "default": "false",
+            "help": "Adds R with knitr and rmarkdown. Skip it for Python-only or prose documents."
+        },
+        {
+            "key": "rPackages",
+            "label": "Extra R packages",
+            "kind": "text",
+            "default": "",
+            "help": "Space-separated apt r-cran-* names, e.g. 'r-cran-ggplot2 r-cran-dplyr'."
+        }
+    ],
+    "env": {},
+    "extraFiles": [
+        "engine.cjs"
+    ],
+    "modes": [
+        {
+            "kind": "docker",
+            "image": "ghcr.io/texlyre/chelys-recipe-quarto:1.10.18",
+            "dockerfileUrl": "Dockerfile",
+            "buildSteps": [],
+            "runArgs": [
+                "-p",
+                "${wsPort}:${wsPort}",
+                "-e",
+                "WS_PORT=${wsPort}"
+            ]
+        },
+        {
+            "kind": "connect"
+        }
+    ],
+    "typeConfig": {
+        "configId": "quarto",
+        "projectType": "quarto",
+        "inputExtensions": [
+            "qmd"
+        ],
+        "inputFiles": [
+            {
+                "extension": "qmd",
+                "label": {
+                    "key": "{typesetter} File",
+                    "params": {
+                        "typesetter": "Quarto"
+                    }
+                },
+                "mimeType": "text/markdown"
+            }
+        ],
+        "outputFormats": [
+            {
+                "id": "pdf",
+                "mimeType": "application/pdf",
+                "rendererPluginId": "pdf-renderer"
+            },
+            {
+                "id": "canvas-pdf",
+                "mimeType": "application/pdf",
+                "rendererPluginId": "canvas-renderer",
+                "outputType": "canvas"
+            },
+            {
+                "id": "typst",
+                "mimeType": "application/pdf"
+            },
+            {
+                "id": "beamer",
+                "mimeType": "application/pdf"
+            },
+            {
+                "id": "html",
+                "mimeType": "text/html"
+            },
+            {
+                "id": "revealjs",
+                "mimeType": "text/html"
+            },
+            {
+                "id": "docx",
+                "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            },
+            {
+                "id": "pptx",
+                "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            },
+            {
+                "id": "epub",
+                "mimeType": "application/epub+zip"
+            }
+        ],
+        "transportType": "websocket",
+        "transportUrl": "ws://localhost:${wsPort}",
+        "incrementalSync": true,
+        "formatter": "",
+        "hasOutline": false,
+        "ui": {
+            "compile": {
+                "fields": [
+                    {
+                        "key": "format",
+                        "label": "Output Format:",
+                        "kind": "select",
+                        "sendAs": "format",
+                        "defaultValue": "pdf",
+                        "options": [
+                            {
+                                "label": "PDF",
+                                "value": "pdf"
+                            },
+                            {
+                                "label": "Canvas (PDF)",
+                                "value": "canvas-pdf"
+                            },
+                            {
+                                "label": "PDF (Typst)",
+                                "value": "typst"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "execute",
+                        "label": {
+                            "key": "Execute code cells"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": true,
+                        "help": {
+                            "key": "Disable to render prose only. Much faster while drafting."
+                        }
+                    },
+                    {
+                        "key": "profile",
+                        "label": {
+                            "key": "Profile:"
+                        },
+                        "kind": "text",
+                        "sendAs": "option",
+                        "defaultValue": "",
+                        "help": {
+                            "key": "Optional Quarto profile name passed through --profile."
+                        }
+                    }
+                ]
+            },
+            "export": {
+                "label": "Export",
+                "fields": [
+                    {
+                        "key": "format",
+                        "label": "Export Format:",
+                        "kind": "select",
+                        "sendAs": "format",
+                        "defaultValue": "pdf",
+                        "options": [
+                            {
+                                "label": "PDF",
+                                "value": "pdf"
+                            },
+                            {
+                                "label": "PDF (Typst)",
+                                "value": "typst"
+                            },
+                            {
+                                "label": "Beamer (PDF)",
+                                "value": "beamer"
+                            },
+                            {
+                                "label": "HTML (single file)",
+                                "value": "html"
+                            },
+                            {
+                                "label": "reveal.js slides",
+                                "value": "revealjs"
+                            },
+                            {
+                                "label": "Word (DOCX)",
+                                "value": "docx"
+                            },
+                            {
+                                "label": "PowerPoint (PPTX)",
+                                "value": "pptx"
+                            },
+                            {
+                                "label": "EPUB",
+                                "value": "epub"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "execute",
+                        "label": {
+                            "key": "Execute code cells"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": true
+                    },
+                    {
+                        "key": "cacheRefresh",
+                        "label": {
+                            "key": "Refresh execution cache"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false,
+                        "help": {
+                            "key": "Forces cached cells to run again."
+                        }
+                    },
+                    {
+                        "key": "profile",
+                        "label": {
+                            "key": "Profile:"
+                        },
+                        "kind": "text",
+                        "sendAs": "option",
+                        "defaultValue": ""
+                    },
+                    {
+                        "key": "includeLog",
+                        "label": {
+                            "key": "Include log file"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false
+                    }
+                ]
+            },
+            "renderers": [
+                {
+                    "format": "pdf",
+                    "label": "PDF"
+                },
+                {
+                    "format": "canvas-pdf",
+                    "label": "Canvas (PDF)"
+                }
+            ],
+            "info": {
+                "title": "Quarto",
+                "rows": [
+                    {
+                        "label": {
+                            "key": "{typesetter} Engine:",
+                            "params": {
+                                "typesetter": "Quarto"
+                            }
+                        },
+                        "value": {
+                            "key": "Quarto v1.10.18 (bundled Pandoc and Typst)"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "{typesetter} Compilers:",
+                            "params": {
+                                "typesetter": "PDF"
+                            }
+                        },
+                        "value": {
+                            "key": "LaTeX (TeX Live full 2026), Typst"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Execution:"
+                        },
+                        "value": {
+                            "key": "Jupyter (Python), knitr (R, opt-in)"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Transport Protocol:"
+                        },
+                        "value": {
+                            "key": "WebSocket compile bridge"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Input Format:"
+                        },
+                        "value": {
+                            "key": "Quarto Markdown (.qmd)"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Output Formats:"
+                        },
+                        "value": {
+                            "key": "PDF, Canvas (PDF), PDF (Typst)"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Export Formats:"
+                        },
+                        "value": {
+                            "key": "PDF, Typst, Beamer, HTML, reveal.js, DOCX, PPTX, EPUB"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -3,8 +3,8 @@
     "type": "typesetter",
     "name": "Slidev",
     "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/slidev/icon.svg",
-    "description": "The Slidev presentation tool. Compiles Markdown decks to PDF over a local WebSocket compile bridge, and exports PPTX, PNG, or a static site as a download.",
-    "notes": "Slidev runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a Slidev-specific engine adapter. Slidev compiles a Markdown deck (slides.md by default) into slides. Preview is PDF only; PPTX, PNG, and static-site targets are download-only via Export, because PPTX/PNG are captured images and the site is a directory of files. PDF, PPTX, and PNG export render the slides with Playwright's bundled Chromium (provided by the Playwright base image); the static-site build uses Vite and needs no browser. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile. When options.action is 'clear-cache' the tree is wiped and status 0 returned without compiling. When options.export is true the output bytes are returned for download; other option keys are passed through from the recipe UI schema.",
+    "description": "Compiles Slidev Markdown decks to PDF, and exports PPTX, PNG, or a static site.",
+    "notes": "Slidev runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a Slidev-specific engine adapter. Slidev compiles a Markdown deck (slides.md by default) into slides. Preview is PDF only; PPTX, PNG, and static-site targets are download-only via Export, because PPTX/PNG are captured images and the site is a directory of files. PDF, PPTX, and PNG export render the slides with Playwright's bundled Chromium (provided by the Playwright base image); the static-site build uses Vite and needs no browser. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile. When options.action is 'clear-cache' the tree is wiped and status 0 returned without compiling. When options.export is true the output bytes are returned for download; other option keys are passed through from the recipe UI schema. Themes and addons must be present in the image because there is no per-project install step; the Extra themes and addons variable is appended to the global npm install at build time and every @slidev, slidev-theme-, and slidev-addon- package is linked into the workspace, so decks resolve them. The prebuilt image only carries the bundled themes, so setting it builds locally instead of pulling.",
     "tags": [
         "slidev",
         "markdown",
@@ -22,6 +22,13 @@
             "kind": "number",
             "default": "7044",
             "help": "Port the compile bridge listens on."
+        },
+        {
+            "key": "npmPackages",
+            "label": "Extra themes and addons",
+            "kind": "text",
+            "default": "",
+            "help": "Space-separated npm packages added to the image, e.g. 'slidev-theme-penguin slidev-addon-python-runner'."
         }
     ],
     "env": {},
@@ -32,7 +39,7 @@
         {
             "kind": "docker",
             "image": "ghcr.io/texlyre/chelys-recipe-slidev:52.18.0",
-            "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/slidev/52.18.0/Dockerfile",
+            "dockerfileUrl": "Dockerfile",
             "buildSteps": [],
             "runArgs": [
                 "-p",

@@ -1,3 +1,16 @@
+Chelys Recipes is licensed under the MIT License, reproduced below.
+
+Third-party recipe icons under recipes/<type>/<recipe-id>/icon.* are not covered
+by it. They are aggregated works that retain their upstream licenses, some of
+which are copyleft. Each icon carries a notice in the file itself, and
+CONTRIBUTING.md#recipe-icons records the upstream source and license for every one. Full
+license texts are in LICENSES/.
+
+Aggregating these icons does not extend their terms to the rest of this
+repository, and nothing here grants rights in the trademarks they depict.
+
+----
+
 MIT License
 
 Copyright (c) 2026 TeXlyre

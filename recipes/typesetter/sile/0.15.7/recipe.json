@@ -2,8 +2,8 @@
     "id": "sile",
     "type": "typesetter",
     "name": "SILE",
-    "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/sile/icon.png",
-    "description": "The SILE typesetting engine. Compiles .sil documents to PDF over a local WebSocket compile bridge.",
+    "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/sile/icon.svg",
+    "description": "Compiles SILE documents to PDF over a local WebSocket compile bridge.",
     "notes": "SILE runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1), which implements the TeXlyre compile protocol: it receives project files over a WebSocket, runs sile via the ENGINE_* variables, and returns the compiled PDF. Docker mode is recommended. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile. When options.action is 'clear-cache' the tree is wiped and status 0 returned without compiling. When options.export is true the output bytes are returned for download; other option keys (e.g. includeLog) are passed through from the recipe UI schema.",
     "tags": [
         "sile",
@@ -27,7 +27,7 @@
         {
             "kind": "docker",
             "image": "ghcr.io/texlyre/chelys-recipe-sile:0.15.7",
-            "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/sile/0.15.7/Dockerfile",
+            "dockerfileUrl": "Dockerfile",
             "buildSteps": [],
             "runArgs": [
                 "-p",

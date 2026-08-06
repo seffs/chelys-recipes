@@ -8,6 +8,8 @@ RUN cargo install lsp-ws-proxy --locked --root /out
 FROM eclipse-temurin:21-jre
 
 ARG LTEX_VERSION=18.7.0
+
+ENV LTEX_HOME=/opt/ltex-ls-plus-${LTEX_VERSION}
 ENV WS_PORT=7020
 
 WORKDIR /opt
@@ -23,8 +25,8 @@ RUN apt-get update \
 COPY --from=proxy-builder /out/bin/lsp-ws-proxy /usr/local/bin/lsp-ws-proxy
 
 RUN chmod +x /usr/local/bin/lsp-ws-proxy \
-    && chmod +x /opt/ltex-ls-plus-18.7.0/bin/ltex-ls-plus
+    && chmod +x "${LTEX_HOME}/bin/ltex-ls-plus"
 
 EXPOSE 7020
 
-ENTRYPOINT ["sh", "-c", "exec lsp-ws-proxy -l 0.0.0.0:$WS_PORT -- /opt/ltex-ls-plus-18.7.0/bin/ltex-ls-plus"]
+ENTRYPOINT ["sh", "-c", "exec lsp-ws-proxy -l 0.0.0.0:$WS_PORT -- $LTEX_HOME/bin/ltex-ls-plus"]

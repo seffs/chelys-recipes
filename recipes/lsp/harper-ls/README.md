@@ -1,12 +1,26 @@
 # Harper LS
 
 Harper LS (`harper-ls`) is an offline, privacy-first grammar and spelling
-checker exposed as a Language Server. It works well for prose-heavy formats such
-as TeX, LaTeX, Typst, BibTeX, Markdown, and plain text. Chelys connects to it
-over a WebSocket proxy (`lsp-ws-proxy`).
+checker exposed as a Language Server. Chelys connects to it over a WebSocket
+proxy (`lsp-ws-proxy`).
+
+It is strongest on Markdown and plain text. Markup-heavy formats such as TeX,
+LaTeX, Typst, and BibTeX are accepted but parsed as prose, so commands and
+entry syntax produce false positives; LTeX LS Plus is the better fit there.
 
 This recipe maps all supported file types to the `markdown` language ID so
 Harper LS treats them consistently as prose.
+
+## Versions
+
+| Version | Harper LS | Image |
+| --- | --- | --- |
+| `2.7.0` | 2.7.0 | `ghcr.io/texlyre/chelys-recipe-harper-ls:2.7.0` |
+| `2.5.0` | 2.5.0 | `ghcr.io/texlyre/chelys-recipe-harper-ls:2.5.0` |
+| `2.4.0` | 2.4.0 | `ghcr.io/texlyre/chelys-recipe-harper-ls:2.4.0` |
+
+Each Dockerfile pins the crate through `ARG HARPER_VERSION`, defaulted to the
+version directory it sits in.
 
 ## Variables
 

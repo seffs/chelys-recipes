@@ -3,7 +3,7 @@
   "type": "lsp",
   "name": "Tinymist (Typst)",
   "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/tinymist-lsp/icon.png",
-  "description": "Integrated language service for Typst. Provides diagnostics, completion, hover, go-to-definition, and formatting for .typ files.",
+  "description": "Language server for Typst, with diagnostics, completion, hover, go-to-definition, and formatting.",
   "notes": "Tinymist communicates LSP over stdio and is bridged to WebSocket with lsp-ws-proxy. System mode builds the server from source with cargo and requires the Rust toolchain. Docker mode bundles Tinymist and the proxy. First system build can take several minutes.",
   "tags": [
     "typst",
@@ -75,7 +75,7 @@
     {
       "kind": "docker",
       "image": "ghcr.io/texlyre/chelys-recipe-tinymist-lsp:0.15.2",
-      "dockerfileUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/tinymist-lsp/0.15.2/Dockerfile",
+      "dockerfileUrl": "Dockerfile",
       "buildSteps": [],
       "runArgs": [
         "-p",

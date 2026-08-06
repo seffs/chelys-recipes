@@ -1,3 +1,4 @@
+ARG TEXLIVE_TAG=latest-full
 ARG PRETEXT_VERSION=2.44.0
 ARG NODE_VERSION=22
 
@@ -5,7 +6,7 @@ FROM ghcr.io/texlyre/chelys-typeset-bridge:1 AS bridge
 
 FROM node:${NODE_VERSION}-bookworm-slim AS node
 
-FROM texlive/texlive:latest-full
+FROM texlive/texlive:${TEXLIVE_TAG}
 
 ARG PRETEXT_VERSION
 
@@ -29,7 +30,7 @@ RUN python3 -m venv --system-site-packages /opt/pretext \
 
 COPY --from=bridge /opt/chelys /opt/chelys
 
-ADD https://texlyre.github.io/chelys-recipes/recipes/typesetter/pretext/2.44.0/engine.cjs /opt/chelys/engine.cjs
+COPY engine.cjs /opt/chelys/engine.cjs
 RUN chmod 0444 /opt/chelys/engine.cjs
 
 ENV WS_PORT=7041
