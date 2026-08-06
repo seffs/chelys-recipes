@@ -6,6 +6,7 @@ FROM ghcr.io/texlyre/chelys-typeset-bridge:1 AS bridge
 FROM mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
 
 ARG SLIDEV_VERSION
+ARG NPM_PACKAGES="${npmPackages}"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -22,19 +23,24 @@ RUN npm install -g \
     @slidev/theme-apple-basic@latest \
     @slidev/theme-bricks@latest \
     @slidev/theme-shibainu@latest \
-    playwright-chromium@${PLAYWRIGHT_VERSION}
+    playwright-chromium@${PLAYWRIGHT_VERSION} \
+    ${NPM_PACKAGES}
 
-RUN mkdir -p /workspace/node_modules/@slidev \
-    && ln -s "$(npm root -g)/@slidev/types" /workspace/node_modules/@slidev/types \
-    && ln -s "$(npm root -g)/@slidev/theme-default" /workspace/node_modules/@slidev/theme-default \
-    && ln -s "$(npm root -g)/@slidev/theme-seriph" /workspace/node_modules/@slidev/theme-seriph \
-    && ln -s "$(npm root -g)/@slidev/theme-apple-basic" /workspace/node_modules/@slidev/theme-apple-basic \
-    && ln -s "$(npm root -g)/@slidev/theme-bricks" /workspace/node_modules/@slidev/theme-bricks \
-    && ln -s "$(npm root -g)/@slidev/theme-shibainu" /workspace/node_modules/@slidev/theme-shibainu
+RUN root="$(npm root -g)" \
+    && mkdir -p /workspace/node_modules/@slidev \
+    && for pkg in "$root"/@slidev/* "$root"/slidev-theme-* "$root"/slidev-addon-*; do \
+    if [ -d "$pkg" ]; then \
+    case "$pkg" in \
+    "$root"/@slidev/*) target="/workspace/node_modules/@slidev/$(basename "$pkg")" ;; \
+    *) target="/workspace/node_modules/$(basename "$pkg")" ;; \
+    esac; \
+    ln -sfn "$pkg" "$target"; \
+    fi; \
+    done
 
 COPY --from=bridge /opt/chelys /opt/chelys
 
-ADD https://texlyre.github.io/chelys-recipes/recipes/typesetter/slidev/52.18.0/engine.cjs /opt/chelys/engine.cjs
+COPY engine.cjs /opt/chelys/engine.cjs
 RUN chmod 0444 /opt/chelys/engine.cjs
 
 ENV WS_PORT=7044
