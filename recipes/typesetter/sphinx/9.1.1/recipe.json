@@ -1,0 +1,295 @@
+{
+    "id": "sphinx",
+    "type": "typesetter",
+    "name": "Sphinx (reStructuredText & MyST)",
+    "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/sphinx/icon.svg",
+    "description": "Builds Sphinx reStructuredText and MyST projects to PDF, and exports HTML, EPUB, or LaTeX sources.",
+    "notes": "Sphinx runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a Sphinx-specific engine adapter. The image uses the same texlive/texlive:latest-full base as the LaTeX TeX Live recipe, since PDF output goes through the latex builder and latexmk. Sphinx builds a configured project instead of a single file: a conf.py must exist at the project root or in source, doc, docs, or docs/source, which 'sphinx-quickstart' scaffolds. The adapter resolves that directory (or the one named in the Source directory field), runs 'sphinx-build -M <builder>' into _build/chelys, and returns either the PDF or a ZIP of the builder's output directory. Preview is PDF only; html and latex targets are download-only via Export because their output is a directory of cross-linked files. MyST parser and MyST-NB are installed, so Markdown and Jupyter notebook sources work alongside reStructuredText. The image also carries the common theme and extension set, Graphviz, PlantUML, and pandoc for nbsphinx. Projects needing other extensions add them through the Extra Python packages variable, which is appended to the pip install when the image is built; the prebuilt image only carries the defaults, so setting it builds locally instead of pulling. A first textbook-sized build can take minutes, so ENGINE_TIMEOUT defaults to 15 minutes. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile and Sphinx's doctree cache survives between builds. Clearing the cache discards both.",
+    "tags": [
+        "sphinx",
+        "restructuredtext",
+        "myst",
+        "markdown",
+        "typesetting",
+        "pdf",
+        "html",
+        "epub"
+    ],
+    "author": "TeXlyre",
+    "version": "9.1.1",
+    "lastUpdated": "2026-08-03T10:00:00Z",
+    "variables": [
+        {
+            "key": "wsPort",
+            "label": "WebSocket port",
+            "kind": "number",
+            "default": "7048",
+            "help": "Port the compile bridge listens on."
+        },
+        {
+            "key": "pythonPackages",
+            "label": "Extra Python packages",
+            "kind": "text",
+            "default": "",
+            "help": "Space-separated pip packages added to the image, e.g. 'sphinx-gallery sphinxcontrib-katex'."
+        }
+    ],
+    "env": {},
+    "extraFiles": [
+        "engine.cjs"
+    ],
+    "modes": [
+        {
+            "kind": "docker",
+            "image": "ghcr.io/texlyre/chelys-recipe-sphinx:9.1.1",
+            "dockerfileUrl": "Dockerfile",
+            "buildSteps": [],
+            "runArgs": [
+                "-p",
+                "${wsPort}:${wsPort}",
+                "-e",
+                "WS_PORT=${wsPort}"
+            ]
+        },
+        {
+            "kind": "connect"
+        }
+    ],
+    "typeConfig": {
+        "configId": "sphinx",
+        "projectType": "sphinx",
+        "inputExtensions": [
+            "rst",
+            "md"
+        ],
+        "inputFiles": [
+            {
+                "extension": "rst",
+                "label": {
+                    "key": "{typesetter} File",
+                    "params": {
+                        "typesetter": "reStructuredText"
+                    }
+                },
+                "mimeType": "text/x-rst"
+            }
+        ],
+        "outputFormats": [
+            {
+                "id": "pdf",
+                "mimeType": "application/pdf",
+                "rendererPluginId": "pdf-renderer"
+            },
+            {
+                "id": "canvas-pdf",
+                "mimeType": "application/pdf",
+                "rendererPluginId": "canvas-renderer",
+                "outputType": "canvas"
+            },
+            {
+                "id": "epub",
+                "mimeType": "application/epub+zip"
+            },
+            {
+                "id": "zip",
+                "mimeType": "application/zip"
+            }
+        ],
+        "transportType": "websocket",
+        "transportUrl": "ws://localhost:${wsPort}",
+        "incrementalSync": true,
+        "formatter": "",
+        "hasOutline": false,
+        "ui": {
+            "compile": {
+                "fields": [
+                    {
+                        "key": "format",
+                        "label": "Output Format:",
+                        "kind": "select",
+                        "sendAs": "format",
+                        "defaultValue": "pdf",
+                        "options": [
+                            {
+                                "label": "PDF",
+                                "value": "pdf"
+                            },
+                            {
+                                "label": "Canvas (PDF)",
+                                "value": "canvas-pdf"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "sourceDir",
+                        "label": {
+                            "key": "Source Directory:"
+                        },
+                        "kind": "text",
+                        "sendAs": "option",
+                        "defaultValue": "",
+                        "help": {
+                            "key": "Directory containing conf.py. Leave blank to detect it automatically."
+                        }
+                    },
+                    {
+                        "key": "nitpicky",
+                        "label": {
+                            "key": "Nitpicky mode"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false,
+                        "help": {
+                            "key": "Warn about every missing cross-reference target."
+                        }
+                    },
+                    {
+                        "key": "freshEnv",
+                        "label": {
+                            "key": "Rebuild from scratch"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false,
+                        "help": {
+                            "key": "Discards the cached environment. Slow; needed after config changes."
+                        }
+                    }
+                ]
+            },
+            "export": {
+                "label": "Export",
+                "fields": [
+                    {
+                        "key": "format",
+                        "label": "Export Format:",
+                        "kind": "select",
+                        "sendAs": "format",
+                        "defaultValue": "pdf",
+                        "options": [
+                            {
+                                "label": "PDF",
+                                "value": "pdf"
+                            },
+                            {
+                                "label": "Web site (ZIP)",
+                                "value": "html"
+                            },
+                            {
+                                "label": "EPUB",
+                                "value": "epub"
+                            },
+                            {
+                                "label": "LaTeX sources (ZIP)",
+                                "value": "latex"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "sourceDir",
+                        "label": {
+                            "key": "Source Directory:"
+                        },
+                        "kind": "text",
+                        "sendAs": "option",
+                        "defaultValue": ""
+                    },
+                    {
+                        "key": "warningsAsErrors",
+                        "label": {
+                            "key": "Treat warnings as errors"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false
+                    },
+                    {
+                        "key": "freshEnv",
+                        "label": {
+                            "key": "Rebuild from scratch"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false
+                    },
+                    {
+                        "key": "includeLog",
+                        "label": {
+                            "key": "Include log file"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false
+                    }
+                ]
+            },
+            "renderers": [
+                {
+                    "format": "pdf",
+                    "label": "PDF"
+                },
+                {
+                    "format": "canvas-pdf",
+                    "label": "Canvas (PDF)"
+                }
+            ],
+            "info": {
+                "title": "Sphinx",
+                "rows": [
+                    {
+                        "label": {
+                            "key": "{typesetter} Engine:",
+                            "params": {
+                                "typesetter": "Sphinx"
+                            }
+                        },
+                        "value": {
+                            "key": "Sphinx v9.1.1"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Build Tool:"
+                        },
+                        "value": {
+                            "key": "sphinx-build, latexmk (TeX Live full 2026)"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Transport Protocol:"
+                        },
+                        "value": {
+                            "key": "WebSocket compile bridge"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Input Format:"
+                        },
+                        "value": {
+                            "key": "reStructuredText (.rst), MyST Markdown (.md) with conf.py"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Output Formats:"
+                        },
+                        "value": {
+                            "key": "PDF, Canvas (PDF)"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Export Formats:"
+                        },
+                        "value": {
+                            "key": "PDF, Web site (ZIP), EPUB, LaTeX sources (ZIP)"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
