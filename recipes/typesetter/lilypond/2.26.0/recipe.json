@@ -1,0 +1,301 @@
+{
+    "id": "lilypond",
+    "type": "typesetter",
+    "name": "LilyPond",
+    "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/typesetter/lilypond/icon.png",
+    "description": "Engraves LilyPond scores to PDF, and exports PNG or SVG pages, MIDI, and synthesised audio.",
+    "notes": "LilyPond runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a LilyPond-specific engine adapter. The image installs the official upstream binary release rather than a distribution package, which bundles Guile and Ghostscript. The adapter selects the backend per format: --pdf for PDF, --png with a configurable resolution, and -dbackend=svg for SVG. PNG and SVG output is one file per page, so those exports are archived as a ZIP. Scores containing a \\midi block also emit a MIDI file, which is returned beside the PDF as a downloadable artifact and can be exported directly or synthesised to MP3 with FluidSynth and the FluidR3 General MIDI soundfont, then encoded with LAME. Point-and-click is disabled by default, which is the recommended setting for distributed PDFs; -dcrop is available for tight bounding boxes around the engraved system. The converters musicxml2ly, midi2ly, and abc2ly are on the path for importing existing scores. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile. When options.action is 'clear-cache' the tree is wiped and status 0 returned without compiling.",
+    "tags": [
+        "lilypond",
+        "music",
+        "engraving",
+        "score",
+        "typesetting",
+        "pdf",
+        "midi"
+    ],
+    "author": "TeXlyre",
+    "version": "2.26.0",
+    "lastUpdated": "2026-08-03T10:00:00Z",
+    "variables": [
+        {
+            "key": "wsPort",
+            "label": "WebSocket port",
+            "kind": "number",
+            "default": "7050",
+            "help": "Port the compile bridge listens on."
+        }
+    ],
+    "env": {},
+    "extraFiles": [
+        "engine.cjs"
+    ],
+    "modes": [
+        {
+            "kind": "docker",
+            "image": "ghcr.io/texlyre/chelys-recipe-lilypond:2.26.0",
+            "dockerfileUrl": "Dockerfile",
+            "buildSteps": [],
+            "runArgs": [
+                "-p",
+                "${wsPort}:${wsPort}",
+                "-e",
+                "WS_PORT=${wsPort}"
+            ]
+        },
+        {
+            "kind": "connect"
+        }
+    ],
+    "typeConfig": {
+        "configId": "lilypond",
+        "projectType": "lilypond",
+        "inputExtensions": [
+            "ly",
+            "ily"
+        ],
+        "inputFiles": [
+            {
+                "extension": "ly",
+                "label": {
+                    "key": "{typesetter} File",
+                    "params": {
+                        "typesetter": "LilyPond"
+                    }
+                },
+                "mimeType": "text/x-lilypond"
+            }
+        ],
+        "outputFormats": [
+            {
+                "id": "pdf",
+                "mimeType": "application/pdf",
+                "rendererPluginId": "pdf-renderer"
+            },
+            {
+                "id": "canvas-pdf",
+                "mimeType": "application/pdf",
+                "rendererPluginId": "canvas-renderer",
+                "outputType": "canvas"
+            },
+            {
+                "id": "zip",
+                "mimeType": "application/zip"
+            },
+            {
+                "id": "midi",
+                "mimeType": "audio/midi"
+            },
+            {
+                "id": "mp3",
+                "mimeType": "audio/mpeg"
+            }
+        ],
+        "transportType": "websocket",
+        "transportUrl": "ws://localhost:${wsPort}",
+        "incrementalSync": true,
+        "formatter": "",
+        "hasOutline": false,
+        "ui": {
+            "compile": {
+                "fields": [
+                    {
+                        "key": "format",
+                        "label": "Output Format:",
+                        "kind": "select",
+                        "sendAs": "format",
+                        "defaultValue": "pdf",
+                        "options": [
+                            {
+                                "label": "PDF",
+                                "value": "pdf"
+                            },
+                            {
+                                "label": "Canvas (PDF)",
+                                "value": "canvas-pdf"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "paperSize",
+                        "label": {
+                            "key": "Paper Size:"
+                        },
+                        "kind": "text",
+                        "sendAs": "option",
+                        "defaultValue": "",
+                        "help": {
+                            "key": "Optional LilyPond paper size, e.g. a4 or letter. Blank uses the score's own setting."
+                        }
+                    },
+                    {
+                        "key": "crop",
+                        "label": {
+                            "key": "Crop to music"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false,
+                        "help": {
+                            "key": "Tight bounding box around the engraved system instead of a full page."
+                        }
+                    }
+                ]
+            },
+            "export": {
+                "label": "Export",
+                "fields": [
+                    {
+                        "key": "format",
+                        "label": "Export Format:",
+                        "kind": "select",
+                        "sendAs": "format",
+                        "defaultValue": "pdf",
+                        "options": [
+                            {
+                                "label": "PDF",
+                                "value": "pdf"
+                            },
+                            {
+                                "label": "Images (PNG ZIP)",
+                                "value": "png"
+                            },
+                            {
+                                "label": "Vector pages (SVG ZIP)",
+                                "value": "svg"
+                            },
+                            {
+                                "label": "MIDI",
+                                "value": "midi"
+                            },
+                            {
+                                "label": "Audio (MP3)",
+                                "value": "mp3"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "resolution",
+                        "label": {
+                            "key": "PNG resolution (DPI):"
+                        },
+                        "kind": "number",
+                        "sendAs": "option",
+                        "defaultValue": "300",
+                        "showWhen": {
+                            "field": "format",
+                            "in": [
+                                "png"
+                            ]
+                        }
+                    },
+                    {
+                        "key": "paperSize",
+                        "label": {
+                            "key": "Paper Size:"
+                        },
+                        "kind": "text",
+                        "sendAs": "option",
+                        "defaultValue": ""
+                    },
+                    {
+                        "key": "crop",
+                        "label": {
+                            "key": "Crop to music"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false
+                    },
+                    {
+                        "key": "pointAndClick",
+                        "label": {
+                            "key": "Embed point-and-click links"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false,
+                        "help": {
+                            "key": "Adds source links to the PDF. Leave off for published scores."
+                        }
+                    },
+                    {
+                        "key": "includeLog",
+                        "label": {
+                            "key": "Include log file"
+                        },
+                        "kind": "boolean",
+                        "sendAs": "option",
+                        "defaultValue": false
+                    }
+                ]
+            },
+            "renderers": [
+                {
+                    "format": "pdf",
+                    "label": "PDF"
+                },
+                {
+                    "format": "canvas-pdf",
+                    "label": "Canvas (PDF)"
+                }
+            ],
+            "info": {
+                "title": "LilyPond",
+                "rows": [
+                    {
+                        "label": {
+                            "key": "{typesetter} Engine:",
+                            "params": {
+                                "typesetter": "LilyPond"
+                            }
+                        },
+                        "value": {
+                            "key": "LilyPond v2.26.0"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Audio:"
+                        },
+                        "value": {
+                            "key": "FluidSynth with FluidR3 GM, LAME"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Transport Protocol:"
+                        },
+                        "value": {
+                            "key": "WebSocket compile bridge"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Input Format:"
+                        },
+                        "value": {
+                            "key": "LilyPond (.ly)"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Output Formats:"
+                        },
+                        "value": {
+                            "key": "PDF, Canvas (PDF)"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Export Formats:"
+                        },
+                        "value": {
+                            "key": "PDF, PNG (ZIP), SVG (ZIP), MIDI, MP3"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
