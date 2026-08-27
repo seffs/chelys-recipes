@@ -5,7 +5,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 
 const EMACS_BIN = process.env.EMACS_BIN || 'emacs';
-const ORG_LISP_DIR = process.env.ORG_LISP_DIR || '/opt/org';
+const ORG_LISP_DIR = process.env.ORG_LISP_DIR || '/opt/org/lisp';
 const LATEXMK_BIN = process.env.LATEXMK_BIN || 'latexmk';
 
 const OUTPUT_BASE = 'chelys-output';

@@ -15,13 +15,18 @@ RUN apt-get update \
     curl \
     emacs-nox \
     latexmk \
+    make \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /opt/org \
-    && curl -fL -o /tmp/org.tar "https://elpa.gnu.org/packages/org-${ORG_VERSION}.tar" \
-    && tar -xf /tmp/org.tar -C /opt/org --strip-components=1 \
-    && rm -f /tmp/org.tar \
-    && emacs -Q --batch -L /opt/org \
+    && curl -fL -o /tmp/org.tar.gz \
+        "https://github.com/bzg/org-mode/archive/refs/tags/release_${ORG_VERSION}.tar.gz" \
+    && tar -xzf /tmp/org.tar.gz -C /opt/org --strip-components=1 \
+    && rm -f /tmp/org.tar.gz \
+    && make -C /opt/org autoloads \
+        ORGVERSION="${ORG_VERSION}" \
+        GITVERSION="release_${ORG_VERSION}" \
+    && emacs -Q --batch -L /opt/org/lisp \
         --eval "(progn (require 'org) (princ (org-version)))"
 
 COPY --from=bridge /opt/chelys /opt/chelys
@@ -34,7 +39,7 @@ ENV CACHE_DIR=/workspace/.cache
 ENV ENGINE_ADAPTER=/opt/chelys/engine.cjs
 ENV ENGINE_TIMEOUT=300000
 ENV EMACS_BIN=emacs
-ENV ORG_LISP_DIR=/opt/org
+ENV ORG_LISP_DIR=/opt/org/lisp
 ENV LATEXMK_BIN=latexmk
 
 WORKDIR /workspace
