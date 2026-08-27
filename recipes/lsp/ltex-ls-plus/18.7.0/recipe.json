@@ -3,18 +3,24 @@
   "type": "lsp",
   "name": "LTeX LS Plus",
   "iconUrl": "https://texlyre.github.io/chelys-recipes/recipes/lsp/ltex-ls-plus/icon.svg",
-  "description": "LanguageTool grammar and spell checker for LaTeX, Markdown, Typst, and BibTeX, as a language server.",
+  "description": "LanguageTool grammar and spell checker for LaTeX, Markdown, Typst, BibTeX, AsciiDoc, Quarto, reStructuredText, and Org.",
   "notes": "System mode requires Java 21; set JAVA_HOME below if your default java is older. Docker mode bundles its own Java 21.",
   "tags": [
     "grammar",
     "spell-check",
     "languagetool",
     "latex",
-    "markdown"
+    "markdown",
+    "typst",
+    "bibtex",
+    "asciidoc",
+    "quarto",
+    "restructuredtext",
+    "org"
   ],
   "author": "TeXlyre",
   "version": "18.7.0",
-  "lastUpdated": "2025-06-01T10:00:00Z",
+  "lastUpdated": "2026-08-27T14:50:00Z",
   "variables": [
     {
       "key": "language",

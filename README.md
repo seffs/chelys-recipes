@@ -175,7 +175,7 @@ field and in each recipe's `README.md`.
 | --- | --- | --- |
 | **Harper LS** (`lsp/harper-ls`) | Markdown, plain text | Offline and privacy-first, with a configurable English `dialect`. Weak on TeX, LaTeX, Typst, and BibTeX, where LTeX LS Plus is the better fit. |
 | **JabRef LSP** (`lsp/jabref-ls`) | `.bib` | Integrity, key, and formatting diagnostics from JabRef's `jabls`. |
-| **LTeX LS Plus** (`lsp/ltex-ls-plus`) | LaTeX, Markdown, Typst, BibTeX | LanguageTool-backed, with `language` and `motherTongue` options for false-friend detection. |
+| **LTeX LS Plus** (`lsp/ltex-ls-plus`) | LaTeX, Markdown, Typst, BibTeX, AsciiDoc, Quarto, reStructuredText, Org | LanguageTool-backed, with `language` and `motherTongue` options for false-friend detection. |
 | **TexLab** (`lsp/texlab`) | `.tex`, `.bib` | Diagnostics, completion, hover, go-to-definition, references, and formatting. Indexes project packages on first open. |
 | **Tinymist** (`lsp/tinymist-lsp`) | `.typ` | Diagnostics, completion, hover, go-to-definition, and formatting. |
 
@@ -186,6 +186,7 @@ field and in each recipe's `README.md`.
 | **Asciidoctor** (`typesetter/asciidoctor`) | `.adoc` | PDF | HTML, EPUB, reveal.js, DOCX |
 | **ConTeXt LMTX** (`typesetter/context`) | `.tex` | PDF | SyncTeX alongside the PDF |
 | **LilyPond** (`typesetter/lilypond`) | `.ly` | PDF | PNG, SVG, MIDI, synthesised MP3 |
+| **Org Mode** (`typesetter/org`) | `.org` | PDF | HTML, LaTeX, Markdown |
 | **PreTeXt** (`typesetter/pretext`) | `.ptx` | PDF | web and EPUB targets as ZIP |
 | **Quarto** (`typesetter/quarto`) | `.qmd` | PDF via LaTeX or Typst | HTML, reveal.js, DOCX, PPTX, EPUB, Beamer |
 | **SILE** (`typesetter/sile`) | `.sil` | PDF | — |

@@ -1,7 +1,8 @@
 # LTeX LS Plus
 
-Grammar and spell checker for LaTeX, Markdown, Typst, and BibTeX, built on
-LanguageTool. Chelys connects to it over a WebSocket proxy (`lsp-ws-proxy`).
+Grammar and spell checker for LaTeX, Markdown, Typst, BibTeX, AsciiDoc, Quarto,
+reStructuredText, and Org, built on LanguageTool. Chelys connects to it over a
+WebSocket proxy (`lsp-ws-proxy`).
 
 ## Variables
 
@@ -24,6 +25,25 @@ every run.
 - **Docker**: builds a self-contained image (`Dockerfile`) bundling Java 21 and
   the proxy, publishing `${wsPort}`.
 - **Connect**: attach to an LTeX server already listening on `${wsPort}`.
+
+## Supported document formats
+
+The recipe maps TeXlyre file extensions to the language IDs LTeX LS Plus
+expects:
+
+| Extension | Language ID |
+| --- | --- |
+| `.tex`, `.latex` | `latex` |
+| `.typ`, `.typst` | `typst` |
+| `.bib` | `bibtex` |
+| `.md`, `.markdown` | `markdown` |
+| `.adoc` | `asciidoc` |
+| `.qmd` | `quarto` |
+| `.rst` | `restructuredtext` |
+| `.org` | `org` |
+
+ConTeXt also uses `.tex`, so its `context` language ID cannot be selected from
+extension only, hence not currently supported in TeXlyre.
 
 ## Notes
 

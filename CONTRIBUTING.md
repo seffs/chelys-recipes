@@ -41,7 +41,8 @@ version in the API entry's `versions` array (newest first). A recipe folder is
 treated as versioned when it contains `x.y.z` sub-folders with a `recipe.json`;
 otherwise the flat `recipe.json` is used.
 
-- `<type>` must match a category `id` in `categories.yml` (currently `lsp`).
+- `<type>` must match a category `id` in `categories.yml` (currently `lsp` and
+  `typesetter`).
 - `<recipe-id>` must use lowercase letters, numbers, and hyphens only, and must
   equal the manifest's `id` (the version folder name is not the id).
 
@@ -148,6 +149,7 @@ affiliation or endorsement.
 | `lsp/tinymist-lsp` | `icon.png` | [Myriad-Dreamin/tinymist](https://github.com/Myriad-Dreamin/tinymist) `editors/vscode/icons/ti-white.png` | Apache-2.0 |
 | `typesetter/asciidoctor` | `icon.svg` | [asciidoctor/brand](https://github.com/asciidoctor/brand) `logo/icon/logo-fill-color.svg` | MIT, with explicit usage grant in the brand README |
 | `typesetter/lilypond` | `icon.png` | [lilypond/lilypond](https://github.com/lilypond/lilypond) `Documentation/pictures/double-lily-modified3.png`, cropped square | GPL-3.0 |
+| `typesetter/org` | `icon.svg` | [simple-icons/simple-icons](https://github.com/simple-icons/simple-icons) `icons/org.svg` | CC0-1.0 |
 | `typesetter/sile` | `icon.svg` | [sile-typesetter/sile](https://github.com/sile-typesetter/sile) `documentation/sile-logo.pdf`, glyph extracted to SVG | MIT |
 | `typesetter/slidev` | `icon.svg` | [slidevjs/slidev](https://github.com/slidevjs/slidev) | MIT |
 | `typesetter/sphinx` | `icon.svg` | [sphinx-doc/sphinx](https://github.com/sphinx-doc/sphinx) `doc/_static/favicon.svg` | BSD-2-Clause |
