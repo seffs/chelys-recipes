@@ -27,7 +27,7 @@ RUN cargo install \
 FROM debian:${DEBIAN_VERSION}-slim
 
 ARG MDX2VAST_VERSION=0.5.0
-ARG VALE_VERSION=3.9.1
+ARG VALE_VERSION=3.19.0
 ARG TARGETARCH
 
 RUN apt-get update \
@@ -48,7 +48,9 @@ RUN case "${TARGETARCH}" in \
     esac \
     && curl -fsSL "https://github.com/errata-ai/vale/releases/download/v${VALE_VERSION}/vale_${VALE_VERSION}_Linux_${VALE_ARCH}.tar.gz" \
     | tar -xz -C /usr/local/bin vale \
-    && chmod +x /usr/local/bin/vale
+    && chmod +x /usr/local/bin/vale \
+    && mkdir -p /usr/local/bin/vale_bin \
+    && cp /usr/local/bin/vale /usr/local/bin/vale_bin/vale
 
 ENV WS_PORT=7005
 
