@@ -3,7 +3,7 @@
   "type": "lsp",
   "name": "Vale LS",
   "description": "Configurable prose style linting with Vale, exposed as a language server.",
-  "notes": "Vale LS exposes Vale's configurable prose linting through LSP. It is designed for editorial style enforcement rather than general-purpose grammar, and works with Vale configuration files and style packages. Vale LS can manage the Vale CLI it uses automatically. System mode builds the pinned Vale LS Git tag with Cargo; Docker mode builds Vale LS and lsp-ws-proxy in separate stages and includes the external processors used by reStructuredText, AsciiDoc, and MDX. A .vale.ini is normally required for useful diagnostics.",
+  "notes": "Vale LS exposes Vale's configurable prose linting through LSP. It is designed for editorial style enforcement rather than general-purpose grammar, and works with Vale configuration files and style packages. Vale requires a .vale.ini, a StylesPath, and a document to lint, so the Docker image ships a default config at /workspace/.vale.ini with the proselint and write-good packages synced at build time; without a config no diagnostics are produced for any file type. System mode builds the pinned Vale LS Git tag with Cargo and expects a config on the host. Docker mode builds Vale LS and lsp-ws-proxy in separate stages and includes the external processors used by reStructuredText, AsciiDoc, and MDX. Vale has no LaTeX parser: .tex is mapped to Markdown through a format association, which is an extension-level substitution only, so LaTeX markup is linted as prose.",
   "tags": [
     "vale",
     "style",
@@ -12,7 +12,9 @@
     "editorial",
     "markdown",
     "asciidoc",
-    "restructuredtext"
+    "restructuredtext",
+    "latex",
+    "tex"
   ],
   "author": "TeXlyre",
   "version": "0.5.1",
@@ -29,8 +31,8 @@
       "key": "configPath",
       "label": "Vale config path",
       "kind": "text",
-      "default": "",
-      "help": "Absolute path to a .vale.ini file. Leave blank to use Vale LS discovery."
+      "default": "/workspace/.vale.ini",
+      "help": "Absolute path to a .vale.ini file. The Docker image ships one at /workspace/.vale.ini."
     },
     {
       "key": "syncOnStartup",
@@ -113,7 +115,9 @@
       "adoc",
       "asciidoc",
       "html",
-      "txt"
+      "txt",
+      "tex",
+      "latex"
     ],
     "languageIdMap": {
       "md": "markdown",
@@ -123,7 +127,9 @@
       "adoc": "asciidoc",
       "asciidoc": "asciidoc",
       "html": "html",
-      "txt": "plaintext"
+      "txt": "plaintext",
+      "tex": "latex",
+      "latex": "latex"
     },
     "transportUrl": "ws://localhost:${wsPort}",
     "contentLength": false,

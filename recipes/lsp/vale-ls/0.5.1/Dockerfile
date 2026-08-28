@@ -27,10 +27,13 @@ RUN cargo install \
 FROM debian:${DEBIAN_VERSION}-slim
 
 ARG MDX2VAST_VERSION=0.5.0
+ARG VALE_VERSION=3.9.1
+ARG TARGETARCH
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     ca-certificates \
+    curl \
     asciidoctor \
     nodejs \
     npm \
@@ -38,6 +41,14 @@ RUN apt-get update \
     && npm install -g mdx2vast@${MDX2VAST_VERSION} \
     && npm cache clean --force \
     && rm -rf /var/lib/apt/lists/*
+
+RUN case "${TARGETARCH}" in \
+    arm64) VALE_ARCH=arm64 ;; \
+    *) VALE_ARCH=64-bit ;; \
+    esac \
+    && curl -fsSL "https://github.com/errata-ai/vale/releases/download/v${VALE_VERSION}/vale_${VALE_VERSION}_Linux_${VALE_ARCH}.tar.gz" \
+    | tar -xz -C /usr/local/bin vale \
+    && chmod +x /usr/local/bin/vale
 
 ENV WS_PORT=7005
 
@@ -47,6 +58,19 @@ RUN chmod +x /usr/local/bin/vale-ls \
     && chmod +x /usr/local/bin/lsp-ws-proxy
 
 WORKDIR /workspace
+
+RUN printf '%s\n' \
+    'StylesPath = styles' \
+    'MinAlertLevel = suggestion' \
+    'Packages = proselint, write-good' \
+    '' \
+    '[formats]' \
+    'tex = md' \
+    '' \
+    '[*]' \
+    'BasedOnStyles = Vale, proselint, write-good' \
+    > /workspace/.vale.ini \
+    && vale sync
 
 EXPOSE 7005
 
