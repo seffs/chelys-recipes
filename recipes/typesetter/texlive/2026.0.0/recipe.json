@@ -2,20 +2,23 @@
     "id": "texlive",
     "type": "typesetter",
     "name": "TeX Live (LaTeX)",
-    "description": "Compiles LaTeX documents to PDF with switchable pdfLaTeX, LuaLaTeX, and XeLaTeX engines.",
-    "notes": "LaTeX runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a LaTeX-specific engine adapter. The adapter drives latexmk, which orchestrates the full multi-pass build: it reruns the selected engine until references and the table of contents stabilise, and automatically invokes biber, bibtex, and makeindex as needed. The engine is chosen per compile via the Engine field (pdflatex, lualatex, or xelatex). Shell escape is enabled by default so packages that call external programs work, including minted (Pygments syntax highlighting), svg (Inkscape), and gnuplottex (gnuplot); it can be disabled for untrusted documents. The image is the full TeX Live scheme (texlive-full) plus the external tools Overleaf relies on: Pygments, Inkscape, gnuplot, Ghostscript, ImageMagick, a JRE for asymptote, and Noto fonts. SyncTeX is emitted alongside the PDF as a downloadable artifact. The bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile. When options.action is 'clear-cache' the tree is wiped and status 0 returned without compiling.",
+    "description": "Compiles LaTeX documents to PDF with switchable pdfLaTeX, LuaLaTeX, XeLaTeX, pLaTeX, and upLaTeX engines.",
+    "notes": "LaTeX runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a LaTeX-specific engine adapter. The adapter drives latexmk, which orchestrates the full multi-pass build: it reruns the selected engine until references and the table of contents stabilise, and automatically invokes biber, bibtex, and makeindex as needed. The engine is chosen per compile via the Engine field (pdflatex, lualatex, xelatex, platex, or uplatex). pLaTeX and upLaTeX use latexmk's DVI-to-PDF mode with dvipdfmx and route automatic bibliography/index steps through pbibtex/mendex or upbibtex/upmendex.\nShell escape is enabled by default so packages that call external programs work, including minted (Pygments syntax highlighting), svg (Inkscape), and gnuplottex (gnuplot); it can be disabled for untrusted documents. The image is the full TeX Live scheme (texlive-full) plus the external tools Overleaf relies on: Pygments, Inkscape, gnuplot, Ghostscript, ImageMagick, a JRE for asymptote, and Noto fonts. SyncTeX is emitted alongside the PDF as a downloadable artifact.\nThe bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile. When options.action is 'clear-cache' the tree is wiped and status 0 returned without compiling.",
     "tags": [
         "latex",
         "tex",
         "pdflatex",
         "lualatex",
         "xelatex",
+        "platex",
+        "uplatex",
+        "japanese",
         "typesetting",
         "pdf"
     ],
     "author": "TeXlyre",
     "version": "2026.0.0",
-    "lastUpdated": "2026-07-19T10:00:00Z",
+    "lastUpdated": "2026-08-27T21:38:00Z",
     "variables": [
         {
             "key": "wsPort",
@@ -126,6 +129,14 @@
                             {
                                 "label": "XeLaTeX",
                                 "value": "xelatex"
+                            },
+                            {
+                                "label": "pLaTeX",
+                                "value": "platex"
+                            },
+                            {
+                                "label": "upLaTeX",
+                                "value": "uplatex"
                             }
                         ]
                     },
@@ -208,6 +219,14 @@
                             {
                                 "label": "XeLaTeX",
                                 "value": "xelatex"
+                            },
+                            {
+                                "label": "pLaTeX",
+                                "value": "platex"
+                            },
+                            {
+                                "label": "upLaTeX",
+                                "value": "uplatex"
                             }
                         ]
                     },
@@ -263,7 +282,7 @@
                             }
                         },
                         "value": {
-                            "key": "pdfTeX (2026), XeTeX (2026), LuaTeX (2026)"
+                            "key": "pdfTeX (2026), XeTeX (2026), LuaTeX (2026), pTeX (2026), upTeX (2026)"
                         }
                     },
                     {

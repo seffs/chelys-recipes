@@ -6,10 +6,32 @@ const path = require('node:path');
 
 const LATEXMK_BIN = process.env.LATEXMK_BIN || 'latexmk';
 
-const ENGINE_FLAGS = {
-	pdflatex: '-pdf',
-	lualatex: '-pdflua',
-	xelatex: '-pdfxe',
+const ENGINE_ARGS = {
+	pdflatex: ['-pdf'],
+	lualatex: ['-pdflua'],
+	xelatex: ['-pdfxe'],
+	platex: [
+		'-pdfdvi',
+		'-e',
+		'$latex = "platex %O %S";',
+		'-e',
+		'$dvipdf = "dvipdfmx %O -o %D %S";',
+		'-e',
+		'$bibtex = "pbibtex %O %B";',
+		'-e',
+		'$makeindex = "mendex %O -o %D %S";',
+	],
+	uplatex: [
+		'-pdfdvi',
+		'-e',
+		'$latex = "uplatex %O %S";',
+		'-e',
+		'$dvipdf = "dvipdfmx %O -o %D %S";',
+		'-e',
+		'$bibtex = "upbibtex %O %B";',
+		'-e',
+		'$makeindex = "upmendex %O -o %D %S";',
+	],
 };
 
 function run(command, args, cwd) {
@@ -68,11 +90,11 @@ exports.compile = async ({ mainFile, format, options, workDir }) => {
 	const sourceName = path.basename(sourcePath);
 
 	const engine = String(options.engine || 'pdflatex').trim().toLowerCase();
-	const engineFlag = ENGINE_FLAGS[engine];
-	if (!engineFlag) {
+	const engineArgs = ENGINE_ARGS[engine];
+	if (!engineArgs) {
 		return {
 			status: 1,
-			log: `Unknown engine "${engine}". Choose pdflatex, lualatex, or xelatex.`,
+			log: `Unknown engine "${engine}". Choose pdflatex, lualatex, xelatex, platex, or uplatex.`,
 			format: requestedFormat,
 		};
 	}
@@ -83,7 +105,7 @@ exports.compile = async ({ mainFile, format, options, workDir }) => {
 			: true;
 
 	const args = [
-		engineFlag,
+		...engineArgs,
 		'-interaction=nonstopmode',
 		'-file-line-error',
 		'-halt-on-error',

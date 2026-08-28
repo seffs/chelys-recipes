@@ -14,9 +14,14 @@ The adapter does not call the engine directly. It runs `latexmk`, which
 orchestrates the full multi-pass build: it reruns the selected engine until
 references and the table of contents stabilise, and invokes `biber`, `bibtex`,
 and `makeindex` when the document needs them. The engine is chosen per compile
-rather than per install, so the same container serves pdfLaTeX, LuaLaTeX, and
-XeLaTeX.
+rather than per install, so the same container serves pdfLaTeX, LuaLaTeX,
+XeLaTeX, pLaTeX, and upLaTeX.
 
+pLaTeX and upLaTeX use the traditional Japanese DVI workflow: `latexmk` runs
+`platex` or `uplatex`, then converts the resulting DVI to PDF with `dvipdfmx`.
+Their automatic BibTeX and index steps use `pbibtex`/`mendex` or
+`upbibtex`/`upmendex`, respectively. The full TeX Live image already contains
+those programs, so no additional container packages are required.
 ## Bundled tools
 
 The image is the full TeX Live scheme plus the external programs LaTeX packages
@@ -44,7 +49,7 @@ compile panel for untrusted documents.
 
 ## Options
 
-- **LaTeX Engine**: `pdflatex`, `lualatex`, or `xelatex`.
+- **LaTeX Engine**: `pdflatex`, `lualatex`, `xelatex`, `platex`, or `uplatex`.
 - **Bibliography**: `latexmk` auto-detects the right program; override to force
   Biber or BibTeX.
 - **Shell escape**: passes `-shell-escape`. Required by minted, svg, and
@@ -55,7 +60,8 @@ compile panel for untrusted documents.
 
 `-synctex=1` is always passed, and the generated `.synctex.gz` is returned
 beside the PDF as a downloadable artifact, which is what drives forward and
-reverse search in the TeXlyre PDF viewer.
+reverse search in the TeXlyre PDF viewer. This also applies to the pLaTeX and
+upLaTeX DVI-to-PDF path.
 
 ## Incremental sync
 
