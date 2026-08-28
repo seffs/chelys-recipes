@@ -3,7 +3,7 @@
   "type": "lsp",
   "name": "Vale LS",
   "description": "Configurable prose style linting with Vale, exposed as a language server.",
-  "notes": "Vale LS exposes Vale's configurable prose linting through LSP. It is designed for editorial style enforcement rather than general-purpose grammar, and works with Vale configuration files and style packages. Vale requires a .vale.ini, a StylesPath, and a document to lint, so the Docker image ships a default config at /workspace/.vale.ini with the proselint and write-good packages synced at build time; without a config no diagnostics are produced for any file type. System mode builds the pinned Vale LS Git tag with Cargo and expects a config on the host. Docker mode builds Vale LS and lsp-ws-proxy in separate stages and includes the external processors used by reStructuredText, AsciiDoc, and MDX. Vale has no LaTeX parser: .tex is mapped to Markdown through a format association, which is an extension-level substitution only, so LaTeX markup is linted as prose.",
+  "notes": "Vale LS exposes Vale's configurable prose linting through LSP. It is designed for editorial style enforcement rather than general-purpose grammar. Vale requires a .vale.ini, a StylesPath, and a document to lint, so the Docker image ships a config at /workspace/.vale.ini with the proselint and write-good packages synced at build time; without a config no diagnostics are produced for any file type. The image also installs the Vale CLI on PATH, so installVale defaults to false and the server performs no downloads at startup. System mode builds the pinned Vale LS Git tag with Cargo and expects both a config and the Vale CLI on the host. Vale has no LaTeX parser: .tex is mapped to Markdown through a format association, with ignores for math and float environments so that equations do not produce spelling alerts.",
   "tags": [
     "vale",
     "style",
@@ -38,8 +38,15 @@
       "key": "syncOnStartup",
       "label": "Sync styles on startup",
       "kind": "boolean",
-      "default": "true",
-      "help": "Run vale sync when the language server starts."
+      "default": "false",
+      "help": "Run vale sync when the language server starts. The Docker image syncs its styles at build time."
+    },
+    {
+      "key": "installVale",
+      "label": "Let Vale LS manage the Vale CLI",
+      "kind": "boolean",
+      "default": "false",
+      "help": "Docker mode ships the Vale CLI on PATH. Enable for system mode if vale is not installed."
     }
   ],
   "env": {},
@@ -133,6 +140,6 @@
     },
     "transportUrl": "ws://localhost:${wsPort}",
     "contentLength": false,
-    "clientConfig": "{\"rootUri\":\"file:///\",\"workspaceFolders\":[],\"initializationOptions\":{\"configPath\":\"${configPath}\",\"syncOnStartup\":${syncOnStartup}}}"
+    "clientConfig": "{\"rootUri\":\"file:///\",\"workspaceFolders\":[],\"initializationOptions\":{\"configPath\":\"${configPath}\",\"syncOnStartup\":${syncOnStartup},\"installVale\":${installVale}}}"
   }
 }

@@ -69,8 +69,13 @@ RUN printf '%s\n' \
     '' \
     '[*]' \
     'BasedOnStyles = Vale, proselint, write-good' \
+    '' \
+    '[*.tex]' \
+    'BlockIgnores = (?s) *(\\begin{(?:equation|align|figure|table|verbatim|lstlisting)\*?}.*?\\end{(?:equation|align|figure|table|verbatim|lstlisting)\*?})' \
+    'TokenIgnores = (\$+[^$\n]*\$+)' \
     > /workspace/.vale.ini \
-    && vale sync
+    && vale sync \
+    && vale --config /workspace/.vale.ini ls-config > /dev/null
 
 EXPOSE 7005
 
