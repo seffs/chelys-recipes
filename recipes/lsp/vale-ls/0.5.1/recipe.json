@@ -1,0 +1,132 @@
+{
+  "id": "vale-ls",
+  "type": "lsp",
+  "name": "Vale LS",
+  "description": "Configurable prose style linting with Vale, exposed as a language server.",
+  "notes": "Vale LS exposes Vale's configurable prose linting through LSP. It is designed for editorial style enforcement rather than general-purpose grammar, and works with Vale configuration files and style packages. Vale LS can manage the Vale CLI it uses automatically. System mode builds the pinned Vale LS Git tag with Cargo; Docker mode builds Vale LS and lsp-ws-proxy in separate stages and includes the external processors used by reStructuredText, AsciiDoc, and MDX. A .vale.ini is normally required for useful diagnostics.",
+  "tags": [
+    "vale",
+    "style",
+    "prose",
+    "linting",
+    "editorial",
+    "markdown",
+    "asciidoc",
+    "restructuredtext"
+  ],
+  "author": "TeXlyre",
+  "version": "0.5.1",
+  "lastUpdated": "2026-08-27T21:38:00Z",
+  "variables": [
+    {
+      "key": "wsPort",
+      "label": "WebSocket port",
+      "kind": "number",
+      "default": "7005",
+      "help": "Port the WebSocket proxy listens on."
+    },
+    {
+      "key": "configPath",
+      "label": "Vale config path",
+      "kind": "text",
+      "default": "",
+      "help": "Absolute path to a .vale.ini file. Leave blank to use Vale LS discovery."
+    },
+    {
+      "key": "syncOnStartup",
+      "label": "Sync styles on startup",
+      "kind": "boolean",
+      "default": "true",
+      "help": "Run vale sync when the language server starts."
+    }
+  ],
+  "env": {},
+  "modes": [
+    {
+      "kind": "system",
+      "installSteps": [
+        {
+          "label": "Install Vale LS",
+          "command": "cargo",
+          "args": [
+            "install",
+            "--git",
+            "https://github.com/vale-cli/vale-ls.git",
+            "--tag",
+            "v0.5.1",
+            "--locked"
+          ]
+        },
+        {
+          "label": "Install WebSocket proxy",
+          "command": "cargo",
+          "args": [
+            "install",
+            "lsp-ws-proxy",
+            "--locked"
+          ]
+        }
+      ],
+      "runCommand": {
+        "command": "lsp-ws-proxy",
+        "args": [
+          "-l",
+          "127.0.0.1:${wsPort}",
+          "--",
+          "vale-ls"
+        ]
+      },
+      "uninstallSteps": [
+        {
+          "label": "Remove Vale LS",
+          "command": "cargo",
+          "args": [
+            "uninstall",
+            "vale-ls"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "docker",
+      "image": "ghcr.io/texlyre/chelys-recipe-vale-ls:0.5.1",
+      "dockerfileUrl": "Dockerfile",
+      "buildSteps": [],
+      "runArgs": [
+        "-p",
+        "${wsPort}:${wsPort}",
+        "-e",
+        "WS_PORT=${wsPort}"
+      ]
+    },
+    {
+      "kind": "connect"
+    }
+  ],
+  "typeConfig": {
+    "configId": "vale-ls",
+    "fileExtensions": [
+      "md",
+      "markdown",
+      "mdx",
+      "rst",
+      "adoc",
+      "asciidoc",
+      "html",
+      "txt"
+    ],
+    "languageIdMap": {
+      "md": "markdown",
+      "markdown": "markdown",
+      "mdx": "mdx",
+      "rst": "restructuredtext",
+      "adoc": "asciidoc",
+      "asciidoc": "asciidoc",
+      "html": "html",
+      "txt": "plaintext"
+    },
+    "transportUrl": "ws://localhost:${wsPort}",
+    "contentLength": false,
+    "clientConfig": "{\"rootUri\":\"file:///\",\"workspaceFolders\":[],\"initializationOptions\":{\"configPath\":\"${configPath}\",\"syncOnStartup\":${syncOnStartup}}}"
+  }
+}
