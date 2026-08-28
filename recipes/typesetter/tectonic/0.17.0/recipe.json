@@ -1,0 +1,179 @@
+{
+    "id": "tectonic",
+    "type": "typesetter",
+    "name": "Tectonic",
+    "description": "Compiles LaTeX documents to PDF with Tectonic's self-contained XeTeX-based engine.",
+    "notes": "Tectonic runs inside a Docker container alongside the shared Chelys typesetter bridge (ghcr.io/texlyre/chelys-typeset-bridge:1) and a Tectonic-specific engine adapter. The adapter uses `tectonic -X compile`, requests SyncTeX output, and returns the compiled PDF. Tectonic automatically downloads the TeX support files it needs on first use and caches them under TECTONIC_CACHE_DIR. The Dockerfile installs the upstream static Linux release binary for x86-64 or ARM64 plus Noto fonts for system-font workflows.\nThe bridge keeps a per-connection working tree and reconciles it against the manifest TeXlyre sends, so only changed files travel after the first compile. When options.action is 'clear-cache' the tree is wiped and status 0 returned without compiling.",
+    "tags": [
+        "latex",
+        "tex",
+        "tectonic",
+        "xetex",
+        "typesetting",
+        "pdf",
+        "synctex"
+    ],
+    "author": "TeXlyre",
+    "version": "0.17.0",
+    "lastUpdated": "2026-08-27T21:38:00Z",
+    "variables": [
+        {
+            "key": "wsPort",
+            "label": "WebSocket port",
+            "kind": "number",
+            "default": "7046",
+            "help": "Port the compile bridge listens on."
+        }
+    ],
+    "env": {},
+    "extraFiles": [
+        "engine.cjs"
+    ],
+    "modes": [
+        {
+            "kind": "docker",
+            "image": "ghcr.io/texlyre/chelys-recipe-tectonic:0.17.0",
+            "dockerfileUrl": "Dockerfile",
+            "buildSteps": [],
+            "runArgs": [
+                "-p",
+                "${wsPort}:${wsPort}",
+                "-e",
+                "WS_PORT=${wsPort}"
+            ]
+        },
+        {
+            "kind": "connect"
+        }
+    ],
+    "typeConfig": {
+        "configId": "tectonic",
+        "projectType": "latex",
+        "projectGroup": "tex",
+        "inputExtensions": [
+            "tex"
+        ],
+        "inputFiles": [
+            {
+                "extension": "tex",
+                "label": {
+                    "key": "{typesetter} File",
+                    "params": {
+                        "typesetter": "LaTeX"
+                    }
+                },
+                "mimeType": "application/x-tex"
+            }
+        ],
+        "outputFormats": [
+            {
+                "id": "pdf",
+                "mimeType": "application/pdf",
+                "rendererPluginId": "pdf-renderer"
+            },
+            {
+                "id": "canvas-pdf",
+                "mimeType": "application/pdf",
+                "rendererPluginId": "canvas-renderer",
+                "outputType": "canvas"
+            }
+        ],
+        "transportType": "websocket",
+        "transportUrl": "ws://localhost:${wsPort}",
+        "incrementalSync": true,
+        "formatter": "",
+        "hasOutline": false,
+        "ui": {
+            "compile": {
+                "fields": [
+                    {
+                        "key": "format",
+                        "label": "Output Format:",
+                        "kind": "select",
+                        "sendAs": "format",
+                        "defaultValue": "pdf",
+                        "options": [
+                            {
+                                "label": "PDF",
+                                "value": "pdf"
+                            },
+                            {
+                                "label": "Canvas (PDF)",
+                                "value": "canvas-pdf"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "export": {
+                "label": "Export",
+                "fields": [
+                    {
+                        "key": "format",
+                        "label": "Export Format:",
+                        "kind": "select",
+                        "sendAs": "format",
+                        "defaultValue": "pdf",
+                        "options": [
+                            {
+                                "label": "PDF",
+                                "value": "pdf"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "includeLog",
+                        "label": {
+                            "key": "Include log file"
+                        },
+                        "kind": "boolean",
+                        "defaultValue": false,
+                        "sendAs": "option"
+                    }
+                ]
+            },
+            "renderers": [
+                {
+                    "format": "pdf",
+                    "label": "PDF"
+                },
+                {
+                    "format": "canvas-pdf",
+                    "label": "Canvas (PDF)"
+                }
+            ],
+            "info": {
+                "title": "Tectonic",
+                "rows": [
+                    {
+                        "label": {
+                            "key": "{typesetter} Engine:",
+                            "params": {
+                                "typesetter": "Tectonic"
+                            }
+                        },
+                        "value": {
+                            "key": "Tectonic v0.17.0"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Input Format:"
+                        },
+                        "value": {
+                            "key": "LaTeX (.tex)"
+                        }
+                    },
+                    {
+                        "label": {
+                            "key": "Output Formats:"
+                        },
+                        "value": {
+                            "key": "PDF, Canvas (PDF)"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
