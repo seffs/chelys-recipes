@@ -178,6 +178,7 @@ field and in each recipe's `README.md`.
 | **LTeX LS Plus** (`lsp/ltex-ls-plus`) | LaTeX, Markdown, Typst, BibTeX, AsciiDoc, Quarto, reStructuredText, Org | LanguageTool-backed, with `language` and `motherTongue` options for false-friend detection. |
 | **TexLab** (`lsp/texlab`) | `.tex`, `.bib` | Diagnostics, completion, hover, go-to-definition, references, and formatting. Indexes project packages on first open. |
 | **Tinymist** (`lsp/tinymist-lsp`) | `.typ` | Diagnostics, completion, hover, go-to-definition, and formatting. |
+| **Vale LS** (`lsp/vale-ls`) | Markdown, MDX, reStructuredText, AsciiDoc, HTML, plain text | Configurable editorial style linting with project-specific Vale rules and packages. |
 
 ### Typesetters
 
@@ -192,7 +193,8 @@ field and in each recipe's `README.md`.
 | **SILE** (`typesetter/sile`) | `.sil` | PDF | — |
 | **Slidev** (`typesetter/slidev`) | Markdown | PDF | PPTX, PNG, static site |
 | **Sphinx** (`typesetter/sphinx`) | `.rst`, `.md` | PDF | HTML site, EPUB, LaTeX sources as ZIP |
-| **TeX Live** (`typesetter/texlive`) | `.tex` | PDF | switchable pdfLaTeX, LuaLaTeX, XeLaTeX |
+| **Tectonic** (`typesetter/tectonic`) | `.tex` | PDF | SyncTeX alongside the PDF |
+| **TeX Live** (`typesetter/texlive`) | `.tex` | PDF | switchable pdfLaTeX, LuaLaTeX, XeLaTeX, pLaTeX, upLaTeX |
 | **Tinymist** (`typesetter/tinymist`) | `.typ` | PDF, PDF canvas, SVG canvas | PNG and SVG page bundles, experimental HTML |
 
 ## Icons

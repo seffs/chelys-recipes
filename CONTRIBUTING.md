@@ -161,9 +161,11 @@ These recipes are included without an icon. Chelys falls back to a generic recip
 
 | Recipe | Reason |
 | --- | --- |
+| `lsp/vale-ls` | no icon is bundled without a clear upstream redistribution grant; Chelys falls back to the generic recipe icon |
 | `typesetter/context` | ConTeXt's code is GPLv2, incompatible with the GPLv3 texts here, and its documentation and branding are CC BY-NC-SA, whose NonCommercial clause rules out redistribution |
 | `typesetter/pretext` | PreTeXt is GPL-3.0, so the license is not the obstacle; no logo is published in a locatable form |
 | `typesetter/quarto` | Posit trademark, published without any copyright license |
+| `typesetter/tectonic` | no icon is bundled without a clear upstream redistribution grant; Chelys falls back to the generic recipe icon |
 | `typesetter/texlive` | the TeX Live mark contains Duane Bibby's lion, licensed to TUG only, with no public grant |
 
 ## Adding an icon
@@ -186,5 +188,4 @@ Then embed a notice naming the copyright holder and license:
 convert icon.png -set Copyright "<notice>" icon.png
 ```
 
-Add the license text to `LICENSES/` if it is not already there, and add a row to
-the table above.
+Add the license text to `LICENSES/` if it is not already there, and add a row to the table above.
