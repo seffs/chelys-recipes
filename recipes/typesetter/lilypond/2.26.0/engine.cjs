@@ -121,7 +121,7 @@ exports.compile = async ({ mainFile, format, options, workDir }) => {
 
 	const paperSize = String(options.paperSize || '').trim();
 	if (paperSize) {
-		args.push(`-dpaper-size="${paperSize}"`);
+		args.push(`-dpaper-size=${paperSize}`);
 	}
 
 	args.push(mainFile);
