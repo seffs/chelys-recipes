@@ -7,6 +7,7 @@ FROM debian:stable-slim
 
 ARG TINYMIST_VERSION
 ARG TYPST_TS_VERSION
+ARG FONT_PACKAGES="${fontPackages}"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -14,7 +15,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     curl ca-certificates tar gzip \
     fonts-dejavu fonts-liberation \
-    fonts-noto fonts-noto-cjk fonts-noto-color-emoji \
+    fonts-noto fonts-noto-cjk fonts-noto-color-emoji ${FONT_PACKAGES} \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fL -o /tmp/tinymist.tar.gz \
