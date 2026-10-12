@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 
+const { ACP_BRIDGE_FILE, ACP_BRIDGE_SOURCE } = require('./acp-bridge.cjs');
+
 const RECIPES_DIR = './recipes';
 const CATEGORIES_FILE = './categories.yml';
 
@@ -246,6 +248,33 @@ class RecipeValidator {
     }
   }
 
+  validateAcp(manifest, recipeId, recipeVersionPath) {
+    if (manifest.type !== 'acp') {
+      return;
+    }
+
+    const typeConfig = manifest.typeConfig || {};
+    for (const key of ['sessionMeta', 'mcpServers']) {
+      if (typeConfig[key] === undefined) continue;
+      try {
+        JSON.parse(typeConfig[key]);
+      } catch (error) {
+        this.log('error', `typeConfig.${key} must be a JSON string: ${error.message}`, recipeId);
+      }
+    }
+
+    if (!(manifest.extraFiles || []).includes(ACP_BRIDGE_FILE)) {
+      return;
+    }
+    const copy = path.join(recipeVersionPath, ACP_BRIDGE_FILE);
+    if (
+      fs.existsSync(copy) &&
+      !fs.readFileSync(copy).equals(fs.readFileSync(ACP_BRIDGE_SOURCE))
+    ) {
+      this.log('error', `${ACP_BRIDGE_FILE} differs from ${ACP_BRIDGE_SOURCE}; run npm run sync:acp-bridge`, recipeId);
+    }
+  }
+
   validateManifest(recipeVersionPath, recipePath, recipeId, categoryId, validCategories) {
     const manifestPath = path.join(recipeVersionPath, 'recipe.json');
 
@@ -319,6 +348,7 @@ class RecipeValidator {
     this.validateModes(manifest, recipeId, recipeVersionPath);
     this.validateExtraFiles(manifest, recipeId, recipeVersionPath);
     this.validateTypesetter(manifest, recipeId, recipeVersionPath);
+    this.validateAcp(manifest, recipeId, recipeVersionPath);
 
     return manifest;
   }

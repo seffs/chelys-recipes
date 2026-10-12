@@ -41,8 +41,8 @@ version in the API entry's `versions` array (newest first). A recipe folder is
 treated as versioned when it contains `x.y.z` sub-folders with a `recipe.json`;
 otherwise the flat `recipe.json` is used.
 
-- `<type>` must match a category `id` in `categories.yml` (currently `lsp` and
-  `typesetter`).
+- `<type>` must match a category `id` in `categories.yml` (currently `lsp`,
+  `typesetter`, and `acp`).
 - `<recipe-id>` must use lowercase letters, numbers, and hyphens only, and must
   equal the manifest's `id` (the version folder name is not the id).
 
@@ -103,6 +103,20 @@ Declare GUI-settable inputs under `variables`. Each needs a `key`, `label`, and
 `options`. Reference them anywhere with `${key}` since they are substituted into run
 arguments, Docker run args, environment values, the Dockerfile, `transportUrl`,
 and `clientConfig` on every install and run.
+
+## Agent recipes
+
+Agent recipes (type `acp`) run the agent behind `texlyre-acp-bridge.cjs`, which
+gives it TeXlyre's project tools over the same connection. The canonical bridge
+lives in [`acp-bridge/1/`](acp-bridge/1/README.md); since a recipe can only ship
+files from its own version directory, each agent recipe keeps a copy beside its
+`recipe.json` and lists it in `extraFiles`. The validator fails when a copy
+differs from the canonical one, and `npm run sync:acp-bridge` refreshes every
+copy after the bridge changes.
+
+`typeConfig.sessionMeta` is a JSON string sent with every new session, for agent
+options such as limiting the agent to TeXlyre's tools. The validator checks that
+it parses.
 
 ## Validation
 
