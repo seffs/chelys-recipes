@@ -197,6 +197,12 @@ field and in each recipe's `README.md`.
 | **TeX Live** (`typesetter/texlive`) | `.tex` | PDF | switchable pdfLaTeX, LuaLaTeX, XeLaTeX, pLaTeX, upLaTeX |
 | **Tinymist** (`typesetter/tinymist`) | `.typ` | PDF, PDF canvas, SVG canvas | PNG and SVG page bundles, experimental HTML |
 
+### Agents
+
+| Recipe | Agent | Notes |
+| --- | --- | --- |
+| **Claude Agent** (`acp/claude-agent`) | [`claude-agent-acp`](https://github.com/agentclientprotocol/claude-agent-acp) | Works on the open project through TeXlyre's project tools only; every edit needs the user's approval. Requires a Claude login or `ANTHROPIC_API_KEY`. |
+
 ## Icons
 
 An optional `iconUrl` in the manifest is an absolute URL to an icon beside the

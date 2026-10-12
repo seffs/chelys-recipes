@@ -1,0 +1,56 @@
+# Claude Agent (ACP)
+
+[`@agentclientprotocol/claude-agent-acp`](https://github.com/agentclientprotocol/claude-agent-acp)
+adapts the Claude coding agent to the Agent Client Protocol. ACP is
+newline-delimited JSON-RPC over stdio, so Chelys exposes it through
+`websocat` in line mode, which starts `texlyre-acp-bridge` for each
+connection:
+
+```
+TeXlyre ⇄ WebSocket ⇄ websocat ⇄ stdio ⇄ texlyre-acp-bridge ⇄ stdio ⇄ claude-agent-acp
+                                                 ⇅ HTTP (loopback MCP)
+```
+
+TeXlyre keeps project files in the browser, and this agent only works on files
+on disk or through MCP tools. The bridge therefore serves an MCP endpoint on a
+random loopback port, protected by a per-connection bearer token, and tunnels
+each MCP request back to TeXlyre over the ACP connection as a `_texlyre/mcp`
+request. TeXlyre answers with its project tools (`list_files`, `read_file`,
+`edit_file`, `write_file`), which read and write the live Yjs documents, so
+agent edits merge with collaborators' typing.
+
+The bridge rewrites `session/new` and `session/load` to add that MCP server
+and to use `./workspace` (an empty directory in the recipe folder) as the
+agent's working directory, and reports the directory back on the result as
+`_meta.texlyre.cwd`. All other messages pass through unchanged.
+
+## Variables
+
+| Key | Description | Default |
+| --- | --- | --- |
+| `wsPort` | Port the WebSocket proxy listens on | `7060` |
+
+Editable from the Chelys GUI after installing and re-applied on every run.
+
+## Modes
+
+- **System**: installs `websocat` with `cargo` (requires the Rust toolchain)
+  and the adapter with `npm` (requires Node.js 22 or later), then runs the
+  proxy with the bridge. Uninstalling removes the npm package.
+- **Connect**: attach to a proxy already listening on `${wsPort}`.
+
+## Notes
+
+- The agent signs in with an existing Claude login or an `ANTHROPIC_API_KEY`
+  present in the environment Chelys was started from.
+- `typeConfig.sessionMeta` disables the agent's built-in tools (file, shell,
+  web) and stops it loading the user's Claude settings, skills, and memory
+  (`settingSources: []`), and keeps out every MCP server except TeXlyre's,
+  including claude.ai account connectors (`strictMcpConfig`,
+  `settings.disableClaudeAiConnectors`), so a TeXlyre session only sees
+  TeXlyre's tools.
+- The read-only tools (`list_files`, `read_file`, `compile`) are pre-approved
+  through `allowedTools`; `edit_file` and `write_file` always ask, and TeXlyre
+  shows the proposed change as a diff before you allow it.
+- The MCP endpoint refuses requests without the token, with a browser
+  `Origin`, or with a `Host` other than the loopback address.

@@ -175,6 +175,7 @@ These recipes are included without an icon. Chelys falls back to a generic recip
 
 | Recipe | Reason |
 | --- | --- |
+| `acp/claude-agent` | the Claude and Anthropic marks are published without a copyright license for redistribution |
 | `lsp/vale-ls` | no icon is bundled without a clear upstream redistribution grant; Chelys falls back to the generic recipe icon |
 | `typesetter/context` | ConTeXt's code is GPLv2, incompatible with the GPLv3 texts here, and its documentation and branding are CC BY-NC-SA, whose NonCommercial clause rules out redistribution |
 | `typesetter/pretext` | PreTeXt is GPL-3.0, so the license is not the obstacle; no logo is published in a locatable form |
