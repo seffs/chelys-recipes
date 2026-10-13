@@ -55,6 +55,8 @@
           "exec:node",
           "--exec-args",
           "texlyre-acp-bridge.cjs",
+          "--session-meta",
+          "session-meta.json",
           "claude-agent-acp"
         ]
       },
@@ -76,10 +78,10 @@
   ],
   "typeConfig": {
     "configId": "claude-agent",
-    "transportUrl": "ws://localhost:${wsPort}",
-    "sessionMeta": "{\"claudeCode\":{\"options\":{\"tools\":[],\"settingSources\":[],\"strictMcpConfig\":true,\"settings\":{\"disableClaudeAiConnectors\":true},\"allowedTools\":[\"mcp__texlyre__list_files\",\"mcp__texlyre__read_file\",\"mcp__texlyre__compile\"]}}}"
+    "transportUrl": "ws://localhost:${wsPort}"
   },
   "extraFiles": [
-    "texlyre-acp-bridge.cjs"
+    "texlyre-acp-bridge.cjs",
+    "session-meta.json"
   ]
 }

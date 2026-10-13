@@ -114,9 +114,13 @@ files from its own version directory, each agent recipe keeps a copy beside its
 differs from the canonical one, and `npm run sync:acp-bridge` refreshes every
 copy after the bridge changes.
 
-`typeConfig.sessionMeta` is a JSON string sent with every new session, for agent
-options such as limiting the agent to TeXlyre's tools. The validator checks that
-it parses.
+Agent options, such as limiting the agent to TeXlyre's tools, go in a JSON file
+beside the bridge, listed in `extraFiles` and passed to it with
+`--session-meta <file>`. The bridge sends them with every new session and drops
+whatever options and MCP servers the client asks for, so whoever reaches the
+WebSocket can't lift the restrictions. `typeConfig.sessionMeta` is sent by
+TeXlyre instead, so the bridge ignores it, and the validator warns when a
+bridged recipe sets it.
 
 ## Validation
 

@@ -6,12 +6,19 @@
 // on disk. The bridge serves an MCP endpoint over HTTP on a random loopback
 // port, protected by a per-process bearer token, and tunnels every MCP request
 // to TeXlyre over the existing ACP connection as a `_texlyre/mcp` request.
-// It rewrites `session/new` and `session/load` to point the agent at that
-// endpoint and at a real working directory, and reports the directory back on
-// the `session/new` result as `_meta.texlyre.cwd`. Everything else passes
-// through untouched.
+// It rewrites `session/new` to point the agent at that endpoint and at a real
+// working directory, and reports the directory back on the result as
+// `_meta.texlyre.cwd`.
 //
-// Usage: node texlyre-acp-bridge.cjs <agent-command> [args...]
+// The bridge, not the client, decides how sessions are set up. Whoever reaches
+// the WebSocket is the client, so `session/new` gets only TeXlyre's MCP server
+// and the session options from --session-meta, whatever the client sent; and
+// the client can only send the methods TeXlyre uses. Agent replies and
+// requests pass through untouched.
+//
+// Usage: node texlyre-acp-bridge.cjs [--session-meta <file>] <agent-command> [args...]
+//   --session-meta  JSON object sent as `_meta` on every `session/new`, e.g.
+//                   the agent's tool restrictions. Without it, none is sent.
 // Env:   TEXLYRE_ACP_WORKSPACE  agent working directory (default ./workspace)
 'use strict';
 
@@ -29,13 +36,47 @@ const MCP_PATH = '/mcp';
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
 const MCP_TIMEOUT_MS = 5 * 60 * 1000;
 
+// What TeXlyre sends. The agent accepts more (loading, resuming and forking
+// sessions, providers, gateway login), and each of those could hand it options
+// or MCP servers of the client's choosing, or redirect its API traffic.
+const CLIENT_REQUESTS = new Set(['initialize', 'session/new', 'session/prompt']);
+const CLIENT_NOTIFICATIONS = new Set(['session/cancel']);
+
 const log = (...parts) => console.error('[texlyre-acp-bridge]', ...parts);
 
-const [command, ...commandArgs] = process.argv.slice(2);
-if (!command) {
-	log('usage: texlyre-acp-bridge.cjs <agent-command> [args...]');
+const isObject = (value) =>
+	value !== null && typeof value === 'object' && !Array.isArray(value);
+
+const usage = () => {
+	log(
+		'usage: texlyre-acp-bridge.cjs [--session-meta <file>] <agent-command> [args...]',
+	);
 	process.exit(2);
+};
+
+const args = process.argv.slice(2);
+let sessionMetaFile;
+if (args[0] === '--session-meta') {
+	sessionMetaFile = args[1];
+	args.splice(0, 2);
+	if (!sessionMetaFile) usage();
 }
+const [command, ...commandArgs] = args;
+if (!command) usage();
+
+const readSessionMeta = (file) => {
+	try {
+		const value = JSON.parse(fs.readFileSync(file, 'utf8'));
+		if (!isObject(value)) throw new Error('not a JSON object');
+		return value;
+	} catch (error) {
+		log(`--session-meta ${file}:`, error.message);
+		process.exit(2);
+	}
+};
+const sessionMeta = sessionMetaFile
+	? readSessionMeta(path.resolve(sessionMetaFile))
+	: undefined;
 
 const workspace = path.resolve(
 	process.env.TEXLYRE_ACP_WORKSPACE || 'workspace',
@@ -173,38 +214,61 @@ const mcpServerEntry = () => ({
 	headers: [{ name: 'Authorization', value: `Bearer ${token}` }],
 });
 
+const refuse = (message) => {
+	log(`refused ${String(message.method)} from the client`);
+	if (message.id === undefined) return;
+	toClient({
+		jsonrpc: '2.0',
+		id: message.id,
+		error: {
+			code: -32601,
+			message: `${String(message.method)} is not available through texlyre-acp-bridge`,
+		},
+	});
+};
+
 const fromClient = (line, agent) => {
 	const message = parse(line);
-
-	if (
-		message &&
-		!message.method &&
-		typeof message.id === 'string' &&
-		message.id.startsWith(MCP_ID_PREFIX)
-	) {
-		settleMcp(message);
+	if (!isObject(message)) {
+		log('dropped a client message that is not a JSON-RPC object');
 		return;
 	}
 
-	if (
-		message?.params &&
-		(message.method === 'session/new' || message.method === 'session/load')
-	) {
-		const servers = Array.isArray(message.params.mcpServers)
-			? message.params.mcpServers.filter(
-					(server) => server?.name !== MCP_SERVER_NAME,
-				)
-			: [];
-		message.params.cwd = workspace;
-		message.params.mcpServers = [...servers, mcpServerEntry()];
-		if (message.method === 'session/new' && message.id !== undefined) {
-			pendingSessionNew.add(message.id);
+	// Replies: to the bridge's MCP tunnel requests, or to the agent's requests.
+	if (message.method === undefined) {
+		if (typeof message.id === 'string' && message.id.startsWith(MCP_ID_PREFIX)) {
+			settleMcp(message);
+			return;
 		}
 		agent.stdin.write(`${JSON.stringify(message)}\n`);
 		return;
 	}
 
-	agent.stdin.write(`${line}\n`);
+	const allowed =
+		message.id === undefined ? CLIENT_NOTIFICATIONS : CLIENT_REQUESTS;
+	if (!allowed.has(message.method)) {
+		refuse(message);
+		return;
+	}
+
+	if (message.method === 'session/new') {
+		const params = isObject(message.params) ? message.params : {};
+		const ignored = Array.isArray(params.mcpServers)
+			? params.mcpServers.length
+			: 0;
+		if (ignored) log(`ignored ${ignored} MCP server(s) from the client`);
+		const rest = { ...params };
+		delete rest._meta;
+		message.params = {
+			...rest,
+			cwd: workspace,
+			mcpServers: [mcpServerEntry()],
+			...(sessionMeta ? { _meta: sessionMeta } : {}),
+		};
+		pendingSessionNew.add(message.id);
+	}
+
+	agent.stdin.write(`${JSON.stringify(message)}\n`);
 };
 
 const fromAgent = (line) => {
@@ -291,7 +355,11 @@ const main = async () => {
 		process.on(signal, () => agent.kill(signal));
 	}
 
-	log(`agent ${command} in ${workspace}; MCP on ${mcpUrl}`);
+	log(
+		`agent ${command} in ${workspace}; MCP on ${mcpUrl}; session options ${
+			sessionMetaFile ? `from ${sessionMetaFile}` : 'none'
+		}`,
+	);
 };
 
 main().catch((error) => {

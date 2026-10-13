@@ -266,6 +266,9 @@ class RecipeValidator {
     if (!(manifest.extraFiles || []).includes(ACP_BRIDGE_FILE)) {
       return;
     }
+    if (typeConfig.sessionMeta !== undefined) {
+      this.log('warning', `typeConfig.sessionMeta is ignored behind ${ACP_BRIDGE_FILE}; pass the options with --session-meta instead`, recipeId);
+    }
     const copy = path.join(recipeVersionPath, ACP_BRIDGE_FILE);
     if (
       fs.existsSync(copy) &&

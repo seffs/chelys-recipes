@@ -20,18 +20,34 @@ The bridge:
   `Host`;
 - tunnels each MCP request to TeXlyre over the ACP connection as a
   `_texlyre/mcp` request and returns TeXlyre's answer;
-- rewrites `session/new` and `session/load` to add that MCP server and the real
-  working directory, and reports the directory on the `session/new` result as
-  `_meta.texlyre.cwd`.
+- rewrites `session/new` to use that MCP server and the real working directory,
+  and reports the directory on the result as `_meta.texlyre.cwd`.
 
-Everything else passes through unchanged. It needs Node.js 18 or later and has
-no dependencies.
+The bridge, not the client, decides how sessions are set up, since anything
+that reaches the WebSocket is a client:
+
+- `session/new` gets only TeXlyre's MCP server, whatever servers the client
+  lists. An ACP client can otherwise ask the agent to start any command as a
+  `stdio` MCP server.
+- `session/new` gets the `_meta` from `--session-meta <file>` (a JSON object,
+  such as the agent's tool restrictions), or none. The client's `_meta` is
+  dropped.
+- The client may only send what TeXlyre sends: the `initialize`,
+  `session/new` and `session/prompt` requests, the `session/cancel`
+  notification, and replies to the agent's requests. Other requests get a
+  `-32601` error and other notifications are dropped. The agent accepts more,
+  such as loading, resuming or forking sessions (with their own options and MCP
+  servers), `providers/set` and gateway `authenticate` (which redirect its API
+  traffic).
+
+Messages from the agent pass through unchanged. It needs Node.js 18 or later and
+has no dependencies.
 
 ## Usage in a recipe
 
 ```json
 {
-  "extraFiles": ["texlyre-acp-bridge.cjs"],
+  "extraFiles": ["texlyre-acp-bridge.cjs", "session-meta.json"],
   "modes": [
     {
       "kind": "system",
@@ -39,7 +55,8 @@ no dependencies.
         "command": "websocat",
         "args": [
           "--text", "--exit-on-eof", "ws-l:127.0.0.1:${wsPort}",
-          "exec:node", "--exec-args", "texlyre-acp-bridge.cjs", "<agent-command>"
+          "exec:node", "--exec-args", "texlyre-acp-bridge.cjs",
+          "--session-meta", "session-meta.json", "<agent-command>"
         ]
       }
     }
@@ -48,3 +65,5 @@ no dependencies.
 ```
 
 `--exec-args` must stay last; everything after it is passed to `node`.
+`--session-meta` is optional and must come before the agent command. The bridge
+exits if the file isn't a JSON object.

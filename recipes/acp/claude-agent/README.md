@@ -19,10 +19,11 @@ request. TeXlyre answers with its project tools (`list_files`, `read_file`,
 `edit_file`, `write_file`), which read and write the live Yjs documents, so
 agent edits merge with collaborators' typing.
 
-The bridge rewrites `session/new` and `session/load` to add that MCP server
-and to use `./workspace` (an empty directory in the recipe folder) as the
-agent's working directory, and reports the directory back on the result as
-`_meta.texlyre.cwd`. All other messages pass through unchanged.
+The bridge rewrites `session/new` to use only that MCP server, the options in
+`session-meta.json`, and `./workspace` (an empty directory in the recipe
+folder) as the agent's working directory, and reports the directory back on the
+result as `_meta.texlyre.cwd`. It refuses ACP methods TeXlyre doesn't use; the
+agent's messages pass through unchanged.
 
 ## Variables
 
@@ -43,12 +44,13 @@ Editable from the Chelys GUI after installing and re-applied on every run.
 
 - The agent signs in with an existing Claude login or an `ANTHROPIC_API_KEY`
   present in the environment Chelys was started from.
-- `typeConfig.sessionMeta` disables the agent's built-in tools (file, shell,
-  web) and stops it loading the user's Claude settings, skills, and memory
+- `session-meta.json` disables the agent's built-in tools (file, shell, web)
+  and stops it loading the user's Claude settings, skills, and memory
   (`settingSources: []`), and keeps out every MCP server except TeXlyre's,
   including claude.ai account connectors (`strictMcpConfig`,
   `settings.disableClaudeAiConnectors`), so a TeXlyre session only sees
-  TeXlyre's tools.
+  TeXlyre's tools. The bridge applies it to every session (`--session-meta`),
+  whatever the client sends, and accepts only the ACP methods TeXlyre uses.
 - The read-only tools (`list_files`, `read_file`, `compile`) are pre-approved
   through `allowedTools`; `edit_file` and `write_file` always ask, and TeXlyre
   shows the proposed change as a diff before you allow it.
